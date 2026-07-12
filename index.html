@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>LED Panel Scanner — Документація браку</title>
+  <meta name="description" content="Веб-додаток для документації бракованих LED-панелей через сканування штрихкодів та відправку даних у Google Sheets." />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#0f172a" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- html5-qrcode library -->
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50:  '#eef2ff',
+              100: '#e0e7ff',
+              200: '#c7d2fe',
+              400: '#818cf8',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+              800: '#3730a3',
+              900: '#312e81',
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+
+  <style>
+    * { -webkit-tap-highlight-color: transparent; }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #0f172a;
+      min-height: 100dvh;
+      overscroll-behavior: none;
+    }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #1e293b; }
+    ::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+
+    /* Scanner viewport */
+    #reader {
+      border-radius: 16px;
+      overflow: hidden;
+      background: #000;
+    }
+    #reader video {
+      border-radius: 16px;
+    }
+    /* Hide html5-qrcode default UI clutter */
+    #reader__scan_region { background: transparent !important; }
+    #reader__header_message { display: none !important; }
+    #reader__dashboard_section_swaplink { display: none !important; }
+    #reader__dashboard { display: none !important; }
+    #reader__filescan_input { display: none !important; }
+
+    /* Scanning frame overlay */
+    .scan-frame {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 240px;
+      height: 100px;
+      pointer-events: none;
+      z-index: 10;
+    }
+    .scan-frame::before,
+    .scan-frame::after {
+      content: '';
+      position: absolute;
+      width: 32px;
+      height: 32px;
+      border-color: #6366f1;
+      border-style: solid;
+    }
+    .scan-frame::before { top: 0; left: 0; border-width: 3px 0 0 3px; border-radius: 4px 0 0 0; }
+    .scan-frame::after  { top: 0; right: 0; border-width: 3px 3px 0 0; border-radius: 0 4px 0 0; }
+    .scan-frame-bl, .scan-frame-br {
+      position: absolute;
+      width: 32px;
+      height: 32px;
+      border-color: #6366f1;
+      border-style: solid;
+    }
+    .scan-frame-bl { bottom: 0; left: 0; border-width: 0 0 3px 3px; border-radius: 0 0 0 4px; }
+    .scan-frame-br { bottom: 0; right: 0; border-width: 0 3px 3px 0; border-radius: 0 0 4px 0; }
+
+    /* Scanning line animation */
+    @keyframes scanLine {
+      0%   { top: 8px; opacity: 1; }
+      50%  { top: calc(100% - 8px); opacity: 0.6; }
+      100% { top: 8px; opacity: 1; }
+    }
+    .scan-line {
+      position: absolute;
+      left: 12px; right: 12px;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #6366f1, #a5b4fc, #6366f1, transparent);
+      box-shadow: 0 0 8px 2px #6366f180;
+      animation: scanLine 2s ease-in-out infinite;
+    }
+
+    /* Pulse ring on success */
+    @keyframes successPulse {
+      0%   { transform: scale(0.8); opacity: 1; }
+      100% { transform: scale(1.6); opacity: 0; }
+    }
+    .success-pulse {
+      animation: successPulse 0.6s ease-out forwards;
+    }
+
+    /* Toast slide-in */
+    @keyframes slideUp {
+      from { transform: translateY(120%); opacity: 0; }
+      to   { transform: translateY(0); opacity: 1; }
+    }
+    @keyframes slideDown {
+      from { transform: translateY(0); opacity: 1; }
+      to   { transform: translateY(120%); opacity: 0; }
+    }
+    .toast-in  { animation: slideUp 0.35s cubic-bezier(0.34,1.56,0.64,1) forwards; }
+    .toast-out { animation: slideDown 0.3s ease-in forwards; }
+
+    /* Shimmer loading */
+    @keyframes shimmer {
+      0%   { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+
+    /* Item button active state */
+    .item-btn.active {
+      background: linear-gradient(135deg, #4f46e5, #7c3aed) !important;
+      border-color: #818cf8 !important;
+      color: #fff !important;
+      box-shadow: 0 0 20px #6366f155, 0 4px 16px #4f46e566;
+      transform: scale(1.04);
+    }
+
+    /* Toggle active */
+    .toggle-btn.active {
+      background: linear-gradient(135deg, #059669, #10b981) !important;
+      border-color: #34d399 !important;
+      color: #fff !important;
+      box-shadow: 0 0 20px #10b98155, 0 4px 16px #05996966;
+    }
+
+    /* Submit button pulse when ready */
+    @keyframes readyPulse {
+      0%, 100% { box-shadow: 0 0 0 0 #4f46e580; }
+      50%       { box-shadow: 0 0 0 12px #4f46e500; }
+    }
+    .submit-ready {
+      animation: readyPulse 2.5s ease-in-out infinite;
+    }
+
+    /* Smooth transitions */
+    .item-btn, .toggle-btn { transition: all 0.2s cubic-bezier(0.34,1.3,0.64,1); }
+    .counter-btn { transition: all 0.15s ease; }
+    .counter-btn:active { transform: scale(0.92); }
+
+    /* Overlay backdrop */
+    .modal-backdrop {
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+    }
+
+    /* Input focus glow */
+    .input-glow:focus {
+      box-shadow: 0 0 0 3px #4f46e540, 0 0 20px #4f46e520;
+    }
+  </style>
+</head>
+<body class="text-slate-100 select-none">
+
+  <!-- ==================== MAIN APP ==================== -->
+  <div id="app" class="max-w-2xl mx-auto px-4 py-6 pb-10 space-y-5">
+
+    <!-- Header -->
+    <div class="text-center pb-2">
+      <div class="inline-flex items-center gap-2 bg-slate-800/60 border border-slate-700/60 rounded-2xl px-5 py-2.5 mb-3">
+        <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_#34d399]"></span>
+        <span class="text-sm font-semibold text-slate-300 tracking-wide uppercase">LED Panel Scanner</span>
+      </div>
+      <h1 class="text-2xl font-black text-white tracking-tight">Документація браку</h1>
+      <p class="text-slate-400 text-sm mt-1">Сканування → Вибір позиції → Опис → Відправка</p>
+    </div>
+
+    <!-- ===== BLOCK 1: Scanner ===== -->
+    <div class="bg-slate-800/70 border border-slate-700/60 rounded-3xl p-5 space-y-4 shadow-xl shadow-black/30">
+      <div class="flex items-center gap-2 mb-1">
+        <div class="w-1 h-6 bg-brand-500 rounded-full"></div>
+        <h2 class="font-bold text-white text-lg">Серійний номер</h2>
+      </div>
+
+      <!-- Camera button -->
+      <button
+        id="btn-camera"
+        onclick="toggleCamera()"
+        class="w-full py-5 rounded-2xl font-bold text-lg tracking-wide transition-all duration-200 active:scale-95
+               bg-gradient-to-r from-brand-600 to-violet-600 hover:from-brand-500 hover:to-violet-500
+               text-white shadow-lg shadow-brand-900/50 flex items-center justify-center gap-3"
+        aria-label="Увімкнути камеру для сканування"
+      >
+        <svg id="icon-camera" class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
+          <circle cx="12" cy="13" r="3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+        </svg>
+        <span id="btn-camera-text">УВІМКНУТИ КАМЕРУ</span>
+      </button>
+
+      <!-- Scanner viewport -->
+      <div id="scanner-wrapper" class="hidden relative">
+        <div class="relative rounded-2xl overflow-hidden bg-black" style="min-height:220px;">
+          <div id="reader" class="w-full"></div>
+          <!-- Scan overlay frame -->
+          <div class="scan-frame">
+            <div class="scan-line"></div>
+            <div class="scan-frame-bl"></div>
+            <div class="scan-frame-br"></div>
+          </div>
+        </div>
+        <p class="text-center text-slate-400 text-sm mt-2 flex items-center justify-center gap-2">
+          <svg class="w-4 h-4 text-brand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          Направте камеру на штрихкод панелі
+        </p>
+      </div>
+
+      <!-- Serial number input -->
+      <div class="relative">
+        <label class="block text-xs font-semibold text-slate-400 uppercase tracking-widest mb-2">Серійний номер</label>
+        <div class="relative">
+          <input
+            id="serial-input"
+            type="text"
+            placeholder="Відскануйте або введіть вручну…"
+            oninput="onSerialChange()"
+            class="input-glow w-full bg-slate-900/80 border border-slate-600 rounded-xl px-4 py-4 text-white
+                   text-base font-mono placeholder-slate-500 focus:outline-none focus:border-brand-500
+                   transition-all duration-200 pr-12"
+            autocomplete="off"
+            autocorrect="off"
+            spellcheck="false"
+          />
+          <!-- Clear button -->
+          <button
+            id="btn-clear-serial"
+            onclick="clearSerial()"
+            class="hidden absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center
+                   rounded-lg text-slate-400 hover:text-white hover:bg-slate-700 transition-colors"
+            aria-label="Очистити серійний номер"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+        <!-- Scan success indicator -->
+        <div id="scan-badge" class="hidden mt-2 inline-flex items-center gap-1.5 bg-emerald-900/50 border border-emerald-700/60 rounded-lg px-3 py-1.5">
+          <svg class="w-3.5 h-3.5 text-emerald-400" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+          </svg>
+          <span class="text-emerald-400 text-xs font-semibold">Штрихкод відскановано</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== BLOCK 2: Item Position ===== -->
+    <div class="bg-slate-800/70 border border-slate-700/60 rounded-3xl p-5 shadow-xl shadow-black/30">
+      <div class="flex items-center gap-2 mb-4">
+        <div class="w-1 h-6 bg-violet-500 rounded-full"></div>
+        <h2 class="font-bold text-white text-lg">Позиція панелі (Item)</h2>
+      </div>
+
+      <!-- Visual guide diagram -->
+      <div class="grid grid-cols-2 gap-3 mb-2">
+        <button id="item-LT" onclick="selectItem('LT')" aria-pressed="false"
+          class="item-btn bg-slate-900/80 border-2 border-slate-600 rounded-2xl p-5 text-center
+                 active:scale-95 touch-manipulation"
+          aria-label="Ліворуч зверху">
+          <div class="text-2xl font-black text-white">LT</div>
+          <div class="text-xs text-slate-400 mt-1 font-medium">Ліво · Верх</div>
+          <div class="text-[10px] text-slate-500 mt-0.5">Left Top</div>
+        </button>
+
+        <button id="item-RT" onclick="selectItem('RT')" aria-pressed="false"
+          class="item-btn bg-slate-900/80 border-2 border-slate-600 rounded-2xl p-5 text-center
+                 active:scale-95 touch-manipulation"
+          aria-label="Праворуч зверху">
+          <div class="text-2xl font-black text-white">RT</div>
+          <div class="text-xs text-slate-400 mt-1 font-medium">Право · Верх</div>
+          <div class="text-[10px] text-slate-500 mt-0.5">Right Top</div>
+        </button>
+
+        <button id="item-LB" onclick="selectItem('LB')" aria-pressed="false"
+          class="item-btn bg-slate-900/80 border-2 border-slate-600 rounded-2xl p-5 text-center
+                 active:scale-95 touch-manipulation"
+          aria-label="Ліворуч знизу">
+          <div class="text-2xl font-black text-white">LB</div>
+          <div class="text-xs text-slate-400 mt-1 font-medium">Ліво · Низ</div>
+          <div class="text-[10px] text-slate-500 mt-0.5">Left Bottom</div>
+        </button>
+
+        <button id="item-RB" onclick="selectItem('RB')" aria-pressed="false"
+          class="item-btn bg-slate-900/80 border-2 border-slate-600 rounded-2xl p-5 text-center
+                 active:scale-95 touch-manipulation"
+          aria-label="Праворуч знизу">
+          <div class="text-2xl font-black text-white">RB</div>
+          <div class="text-xs text-slate-400 mt-1 font-medium">Право · Низ</div>
+          <div class="text-[10px] text-slate-500 mt-0.5">Right Bottom</div>
+        </button>
+      </div>
+
+      <!-- Selected indicator -->
+      <div id="item-indicator" class="mt-3 text-center">
+        <span class="text-slate-500 text-sm">Нічого не обрано</span>
+      </div>
+    </div>
+
+    <!-- ===== BLOCK 3: Problem / Notes ===== -->
+    <div class="bg-slate-800/70 border border-slate-700/60 rounded-3xl p-5 space-y-5 shadow-xl shadow-black/30">
+      <div class="flex items-center gap-2 mb-1">
+        <div class="w-1 h-6 bg-amber-500 rounded-full"></div>
+        <h2 class="font-bold text-white text-lg">Опис поломки</h2>
+      </div>
+
+      <!-- Pixels counter -->
+      <div class="bg-slate-900/60 border border-slate-700/40 rounded-2xl p-4">
+        <div class="flex items-center justify-between mb-3">
+          <div>
+            <p class="font-semibold text-white">🔴 Пікселі</p>
+            <p class="text-xs text-slate-400 mt-0.5">Кількість битих пікселів</p>
+          </div>
+          <div id="px-badge" class="hidden bg-red-900/50 border border-red-700/50 rounded-lg px-3 py-1">
+            <span id="px-badge-text" class="text-red-400 text-sm font-bold"></span>
+          </div>
+        </div>
+        <div class="flex items-center justify-center gap-6">
+          <button
+            id="btn-px-minus"
+            onclick="changePixels(-1)"
+            class="counter-btn w-16 h-16 rounded-2xl bg-slate-800 border border-slate-600
+                   text-white text-3xl font-bold flex items-center justify-center
+                   hover:bg-red-900/40 hover:border-red-600 active:bg-red-900/60
+                   touch-manipulation"
+            aria-label="Зменшити кількість пікселів"
+          >−</button>
+
+          <div class="text-center min-w-[70px]">
+            <div id="px-count" class="text-5xl font-black text-white tabular-nums">0</div>
+            <div class="text-xs text-slate-500 mt-1">пікселів</div>
+          </div>
+
+          <button
+            id="btn-px-plus"
+            onclick="changePixels(1)"
+            class="counter-btn w-16 h-16 rounded-2xl bg-slate-800 border border-slate-600
+                   text-white text-3xl font-bold flex items-center justify-center
+                   hover:bg-emerald-900/40 hover:border-emerald-600 active:bg-emerald-900/60
+                   touch-manipulation"
+            aria-label="Збільшити кількість пікселів"
+          >+</button>
+        </div>
+      </div>
+
+      <!-- Shader toggle -->
+      <div class="bg-slate-900/60 border border-slate-700/40 rounded-2xl p-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="font-semibold text-white">🌈 Шейдер</p>
+            <p class="text-xs text-slate-400 mt-0.5">Проблема з шейдером</p>
+          </div>
+          <button
+            id="toggle-shader"
+            onclick="toggleShader()"
+            class="toggle-btn bg-slate-800 border-2 border-slate-600 rounded-2xl px-8 py-4
+                   font-bold text-lg text-slate-400 touch-manipulation active:scale-95"
+            aria-pressed="false"
+            aria-label="Увімкнути або вимкнути шейдер"
+          >
+            Шейдер
+          </button>
+        </div>
+      </div>
+
+      <!-- Problem preview -->
+      <div id="problem-preview-wrap" class="hidden bg-brand-900/30 border border-brand-700/30 rounded-xl px-4 py-3">
+        <p class="text-xs text-slate-400 mb-1 font-medium uppercase tracking-wider">Попередній перегляд запису:</p>
+        <p id="problem-preview" class="text-brand-300 font-mono text-sm font-medium break-all"></p>
+      </div>
+
+      <!-- Notes textarea -->
+      <div>
+        <label class="block text-xs font-semibold text-slate-400 uppercase tracking-widest mb-2">
+          📝 Додаткові нотатки (необов'язково)
+        </label>
+        <textarea
+          id="notes-input"
+          placeholder="Введіть додатковий опис поломки…"
+          oninput="updateProblemPreview()"
+          rows="3"
+          class="input-glow w-full bg-slate-900/80 border border-slate-600 rounded-xl px-4 py-3.5
+                 text-white text-base placeholder-slate-500 focus:outline-none focus:border-brand-500
+                 transition-all duration-200 resize-none"
+        ></textarea>
+      </div>
+    </div>
+
+    <!-- ===== BLOCK 4: Submit ===== -->
+    <div class="space-y-3">
+      <!-- Validation hint -->
+      <div id="submit-hint" class="flex items-center gap-2 justify-center text-slate-500 text-sm py-1">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        <span id="hint-text">Заповніть серійний номер та виберіть позицію</span>
+      </div>
+
+      <button
+        id="btn-submit"
+        onclick="submitData()"
+        disabled
+        class="w-full py-6 rounded-3xl font-black text-xl tracking-wide transition-all duration-300
+               bg-slate-700 text-slate-500 cursor-not-allowed
+               flex items-center justify-center gap-3 touch-manipulation"
+        aria-label="Відправити дані в Google Sheets"
+      >
+        <svg id="submit-icon" class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        <span id="submit-text">ВІДПРАВИТИ ДАНІ</span>
+      </button>
+    </div>
+
+  </div><!-- /app -->
+
+
+  <!-- ==================== TOAST NOTIFICATION ==================== -->
+  <div id="toast-container" class="fixed bottom-6 left-4 right-4 z-50 pointer-events-none max-w-lg mx-auto">
+    <div id="toast" class="hidden rounded-3xl px-6 py-5 shadow-2xl border pointer-events-auto">
+      <div class="flex items-start gap-4">
+        <div id="toast-icon" class="w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0 mt-0.5"></div>
+        <div class="flex-1">
+          <p id="toast-title" class="font-black text-lg"></p>
+          <p id="toast-body" class="text-sm mt-0.5 opacity-80"></p>
+        </div>
+        <button onclick="hideToast()" class="text-current opacity-60 hover:opacity-100 mt-0.5">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ==================== LOADING OVERLAY ==================== -->
+  <div id="loading-overlay" class="hidden fixed inset-0 z-40 modal-backdrop bg-black/60 flex items-center justify-center">
+    <div class="bg-slate-800 border border-slate-600 rounded-3xl p-8 text-center shadow-2xl max-w-xs w-full mx-4">
+      <!-- Spinner -->
+      <div class="relative w-20 h-20 mx-auto mb-5">
+        <svg class="animate-spin w-20 h-20 text-brand-500" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-20" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3"/>
+          <path class="opacity-90" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+        </svg>
+        <div class="absolute inset-0 flex items-center justify-center">
+          <svg class="w-7 h-7 text-brand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+          </svg>
+        </div>
+      </div>
+      <p class="font-black text-white text-lg">Відправка даних…</p>
+      <p class="text-slate-400 text-sm mt-1">Збереження в Google Sheets</p>
+      <div class="mt-4 h-1.5 bg-slate-700 rounded-full overflow-hidden">
+        <div class="h-full bg-gradient-to-r from-brand-600 to-violet-500 rounded-full animate-pulse" style="width:70%"></div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ==================== JAVASCRIPT ==================== -->
+  <script>
+    // ─────────────────────────────────────────────
+    // CONFIGURATION — Paste your Apps Script URL here
+    // ─────────────────────────────────────────────
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbyvIhnJyzhFPFqDplLq6fOdNGD3949drifdkavTYGO4hrH8AkBUZM_4gF7642RefPMt/exec';
+
+    // ─────────────────────────────────────────────
+    // STATE
+    // ─────────────────────────────────────────────
+    let selectedItem   = null;  // 'LB' | 'RB' | 'LT' | 'RT'
+    let pixelCount     = 0;
+    let shaderActive   = false;
+    let cameraRunning  = false;
+    let html5QrCode    = null;
+    let toastTimer     = null;
+    let scannedFromCamera = false;
+
+    // ─────────────────────────────────────────────
+    // DOM REFERENCES
+    // ─────────────────────────────────────────────
+    const $serial        = () => document.getElementById('serial-input');
+    const $clearSerial   = () => document.getElementById('btn-clear-serial');
+    const $scanBadge     = () => document.getElementById('scan-badge');
+    const $cameraBtn     = () => document.getElementById('btn-camera');
+    const $cameraBtnText = () => document.getElementById('btn-camera-text');
+    const $scannerWrap   = () => document.getElementById('scanner-wrapper');
+    const $pxCount       = () => document.getElementById('px-count');
+    const $pxBadge       = () => document.getElementById('px-badge');
+    const $pxBadgeText   = () => document.getElementById('px-badge-text');
+    const $preview       = () => document.getElementById('problem-preview');
+    const $previewWrap   = () => document.getElementById('problem-preview-wrap');
+    const $notes         = () => document.getElementById('notes-input');
+    const $submitBtn     = () => document.getElementById('btn-submit');
+    const $submitText    = () => document.getElementById('submit-text');
+    const $submitHint    = () => document.getElementById('submit-hint');
+    const $hintText      = () => document.getElementById('hint-text');
+    const $indicator     = () => document.getElementById('item-indicator');
+    const $overlay       = () => document.getElementById('loading-overlay');
+    const $toast         = () => document.getElementById('toast');
+
+    // ─────────────────────────────────────────────
+    // CAMERA / SCANNER
+    // ─────────────────────────────────────────────
+    async function toggleCamera() {
+      if (cameraRunning) {
+        await stopCamera();
+      } else {
+        await startCamera();
+      }
+    }
+
+    async function startCamera() {
+      try {
+        // Request camera permission first
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+        stream.getTracks().forEach(t => t.stop()); // release probe stream
+
+        $scannerWrap().classList.remove('hidden');
+        $cameraBtnText().textContent = 'ВИМКНУТИ КАМЕРУ';
+        $cameraBtn().classList.remove('from-brand-600', 'to-violet-600', 'hover:from-brand-500', 'hover:to-violet-500');
+        $cameraBtn().classList.add('from-rose-700', 'to-red-600', 'hover:from-rose-600', 'hover:to-red-500');
+
+        html5QrCode = new Html5Qrcode('reader');
+
+        const config = {
+          fps: 15,
+          qrbox: { width: 240, height: 100 },
+          aspectRatio: 1.5,
+          experimentalFeatures: { useBarCodeDetectorIfSupported: true },
+          formatsToSupport: [
+            Html5QrcodeSupportedFormats.QR_CODE,
+            Html5QrcodeSupportedFormats.CODE_128,
+            Html5QrcodeSupportedFormats.CODE_39,
+            Html5QrcodeSupportedFormats.EAN_13,
+            Html5QrcodeSupportedFormats.EAN_8,
+            Html5QrcodeSupportedFormats.UPC_A,
+            Html5QrcodeSupportedFormats.UPC_E,
+            Html5QrcodeSupportedFormats.DATA_MATRIX,
+          ]
+        };
+
+        await html5QrCode.start(
+          { facingMode: 'environment' },
+          config,
+          onScanSuccess,
+          () => {} // ignore per-frame errors
+        );
+
+        cameraRunning = true;
+
+      } catch (err) {
+        console.error('Camera error:', err);
+        showToast('error',
+          'Помилка камери',
+          err.name === 'NotAllowedError'
+            ? 'Дозвольте доступ до камери в налаштуваннях браузера'
+            : 'Не вдалось відкрити камеру: ' + err.message
+        );
+      }
+    }
+
+    async function stopCamera() {
+      if (html5QrCode) {
+        try {
+          await html5QrCode.stop();
+          html5QrCode.clear();
+        } catch (e) { /* ignore */ }
+        html5QrCode = null;
+      }
+      cameraRunning = false;
+      $scannerWrap().classList.add('hidden');
+      $cameraBtnText().textContent = 'УВІМКНУТИ КАМЕРУ';
+      $cameraBtn().classList.remove('from-rose-700', 'to-red-600', 'hover:from-rose-600', 'hover:to-red-500');
+      $cameraBtn().classList.add('from-brand-600', 'to-violet-600', 'hover:from-brand-500', 'hover:to-violet-500');
+    }
+
+    function onScanSuccess(decodedText) {
+      $serial().value = decodedText.trim();
+      scannedFromCamera = true;
+      stopCamera();
+      $scanBadge().classList.remove('hidden');
+      $clearSerial().classList.remove('hidden');
+      // Vibrate feedback
+      if (navigator.vibrate) navigator.vibrate([80, 40, 80]);
+      updateSubmitState();
+      updateProblemPreview();
+      // Scroll to item selection
+      setTimeout(() => {
+        document.getElementById('item-LT').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 300);
+    }
+
+    // ─────────────────────────────────────────────
+    // SERIAL INPUT
+    // ─────────────────────────────────────────────
+    function onSerialChange() {
+      const val = $serial().value.trim();
+      $clearSerial().classList.toggle('hidden', !val);
+      $scanBadge().classList.add('hidden');
+      scannedFromCamera = false;
+      updateSubmitState();
+    }
+
+    function clearSerial() {
+      $serial().value = '';
+      $clearSerial().classList.add('hidden');
+      $scanBadge().classList.add('hidden');
+      scannedFromCamera = false;
+      updateSubmitState();
+    }
+
+    // ─────────────────────────────────────────────
+    // ITEM SELECTION
+    // ─────────────────────────────────────────────
+    function selectItem(item) {
+      // Toggle off if same
+      if (selectedItem === item) {
+        selectedItem = null;
+        document.getElementById('item-' + item).classList.remove('active');
+        document.getElementById('item-' + item).setAttribute('aria-pressed', 'false');
+        $indicator().innerHTML = '<span class="text-slate-500 text-sm">Нічого не обрано</span>';
+      } else {
+        // Deselect previous
+        if (selectedItem) {
+          document.getElementById('item-' + selectedItem).classList.remove('active');
+          document.getElementById('item-' + selectedItem).setAttribute('aria-pressed', 'false');
+        }
+        selectedItem = item;
+        document.getElementById('item-' + item).classList.add('active');
+        document.getElementById('item-' + item).setAttribute('aria-pressed', 'true');
+        const labels = { LT: 'Ліво · Верх', RT: 'Право · Верх', LB: 'Ліво · Низ', RB: 'Право · Низ' };
+        $indicator().innerHTML = `
+          <span class="inline-flex items-center gap-2 text-sm font-semibold text-brand-300">
+            <svg class="w-4 h-4 text-brand-400" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+            </svg>
+            Вибрано: <strong class="text-white">${item}</strong> — ${labels[item]}
+          </span>`;
+      }
+      updateSubmitState();
+    }
+
+    // ─────────────────────────────────────────────
+    // PIXELS COUNTER
+    // ─────────────────────────────────────────────
+    function changePixels(delta) {
+      pixelCount = Math.max(0, pixelCount + delta);
+      $pxCount().textContent = pixelCount;
+
+      // Animate number
+      $pxCount().style.transform = 'scale(1.3)';
+      setTimeout(() => { $pxCount().style.transform = 'scale(1)'; }, 120);
+      $pxCount().style.transition = 'transform 0.12s ease';
+
+      if (pixelCount > 0) {
+        $pxBadge().classList.remove('hidden');
+        $pxBadgeText().textContent = pixelCount + ' px';
+        $pxCount().classList.add('text-red-400');
+        $pxCount().classList.remove('text-white');
+      } else {
+        $pxBadge().classList.add('hidden');
+        $pxCount().classList.remove('text-red-400');
+        $pxCount().classList.add('text-white');
+      }
+      updateProblemPreview();
+    }
+
+    // ─────────────────────────────────────────────
+    // SHADER TOGGLE
+    // ─────────────────────────────────────────────
+    function toggleShader() {
+      shaderActive = !shaderActive;
+      const btn = document.getElementById('toggle-shader');
+      btn.classList.toggle('active', shaderActive);
+      btn.setAttribute('aria-pressed', String(shaderActive));
+      updateProblemPreview();
+    }
+
+    // ─────────────────────────────────────────────
+    // PROBLEM PREVIEW
+    // ─────────────────────────────────────────────
+    function buildProblemString() {
+      const parts = [];
+      if (pixelCount > 0) parts.push(pixelCount + ' px');
+      if (shaderActive) parts.push('shader');
+      let result = parts.join(' + ');
+      const notes = $notes().value.trim();
+      if (notes) result = result ? result + ', ' + notes : notes;
+      return result;
+    }
+
+    function updateProblemPreview() {
+      const str = buildProblemString();
+      if (str) {
+        $previewWrap().classList.remove('hidden');
+        $preview().textContent = '"' + str + '"';
+      } else {
+        $previewWrap().classList.add('hidden');
+        $preview().textContent = '';
+      }
+    }
+
+    // ─────────────────────────────────────────────
+    // SUBMIT STATE
+    // ─────────────────────────────────────────────
+    function updateSubmitState() {
+      const hasSerial = $serial().value.trim().length > 0;
+      const hasItem   = selectedItem !== null;
+      const ready     = hasSerial && hasItem;
+
+      const btn = $submitBtn();
+      if (ready) {
+        btn.disabled = false;
+        btn.className = btn.className
+          .replace('bg-slate-700 text-slate-500 cursor-not-allowed', '')
+          .trim();
+        btn.classList.add(
+          'bg-gradient-to-r', 'from-brand-600', 'to-violet-600',
+          'hover:from-brand-500', 'hover:to-violet-500',
+          'text-white', 'cursor-pointer', 'submit-ready',
+          'shadow-xl', 'shadow-brand-900/50', 'active:scale-95'
+        );
+        $hintText().textContent = 'Все готово до відправки!';
+        $submitHint().querySelector('svg').classList.add('text-emerald-400');
+        $submitHint().querySelector('svg').classList.remove('text-slate-400');
+      } else {
+        btn.disabled = true;
+        btn.classList.remove(
+          'bg-gradient-to-r', 'from-brand-600', 'to-violet-600',
+          'hover:from-brand-500', 'hover:to-violet-500',
+          'text-white', 'cursor-pointer', 'submit-ready',
+          'shadow-xl', 'shadow-brand-900/50', 'active:scale-95'
+        );
+        btn.classList.add('bg-slate-700', 'text-slate-500', 'cursor-not-allowed');
+
+        if (!hasSerial && !hasItem) {
+          $hintText().textContent = 'Заповніть серійний номер та виберіть позицію';
+        } else if (!hasSerial) {
+          $hintText().textContent = 'Введіть або відскануйте серійний номер';
+        } else {
+          $hintText().textContent = 'Виберіть позицію панелі (LB / RB / LT / RT)';
+        }
+        $submitHint().querySelector('svg').classList.remove('text-emerald-400');
+      }
+    }
+
+    // ─────────────────────────────────────────────
+    // SUBMIT DATA
+    // ─────────────────────────────────────────────
+    async function submitData() {
+      const serial  = $serial().value.trim();
+      const item    = selectedItem;
+      const problem = buildProblemString();
+
+      if (!serial || !item) return;
+
+      // Check GAS URL configured
+      if (!GAS_URL || GAS_URL === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE') {
+        showToast('error', 'URL не налаштовано',
+          'Відкрийте index.html і вставте URL свого Google Apps Script у змінну GAS_URL');
+        return;
+      }
+
+      showLoading(true);
+
+      const payload = { serial, item, problem };
+
+      try {
+        const response = await fetch(GAS_URL, {
+          method: 'POST',
+          mode: 'no-cors', // required for GAS cross-origin
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+
+        // With no-cors, response is opaque — we treat any lack of error as success
+        showLoading(false);
+        onSubmitSuccess();
+
+      } catch (err) {
+        showLoading(false);
+        onSubmitError(err);
+      }
+    }
+
+    function onSubmitSuccess() {
+      showToast('success', 'ЗБЕРЕЖЕНО УСПІШНО! ✅',
+        `Серійний номер: ${$serial().value.trim()} | Позиція: ${selectedItem}`);
+      resetForm();
+      // Auto-start camera after short delay
+      setTimeout(() => startCamera(), 1200);
+    }
+
+    function onSubmitError(err) {
+      console.error('Submit error:', err);
+      showToast('error', 'ПОМИЛКА ЗБЕРЕЖЕННЯ! ❌',
+        'Дані не втрачено. Перевірте з\'єднання та спробуйте ще раз.', 8000);
+      // DO NOT reset form — preserve entered data
+    }
+
+    // ─────────────────────────────────────────────
+    // RESET FORM
+    // ─────────────────────────────────────────────
+    function resetForm() {
+      // Serial
+      $serial().value = '';
+      $clearSerial().classList.add('hidden');
+      $scanBadge().classList.add('hidden');
+      scannedFromCamera = false;
+
+      // Item
+      if (selectedItem) {
+        document.getElementById('item-' + selectedItem).classList.remove('active');
+        document.getElementById('item-' + selectedItem).setAttribute('aria-pressed', 'false');
+        selectedItem = null;
+      }
+      $indicator().innerHTML = '<span class="text-slate-500 text-sm">Нічого не обрано</span>';
+
+      // Pixels
+      pixelCount = 0;
+      $pxCount().textContent = '0';
+      $pxCount().classList.remove('text-red-400');
+      $pxCount().classList.add('text-white');
+      $pxBadge().classList.add('hidden');
+
+      // Shader
+      shaderActive = false;
+      const shaderBtn = document.getElementById('toggle-shader');
+      shaderBtn.classList.remove('active');
+      shaderBtn.setAttribute('aria-pressed', 'false');
+
+      // Notes
+      $notes().value = '';
+
+      // Preview
+      $previewWrap().classList.add('hidden');
+
+      updateSubmitState();
+      updateProblemPreview();
+
+      // Scroll to top
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // ─────────────────────────────────────────────
+    // LOADING OVERLAY
+    // ─────────────────────────────────────────────
+    function showLoading(show) {
+      $overlay().classList.toggle('hidden', !show);
+      $submitBtn().disabled = show;
+    }
+
+    // ─────────────────────────────────────────────
+    // TOAST NOTIFICATIONS
+    // ─────────────────────────────────────────────
+    function showToast(type, title, body, duration = 4500) {
+      clearTimeout(toastTimer);
+      const toast = $toast();
+      const icon  = document.getElementById('toast-icon');
+      const titleEl = document.getElementById('toast-title');
+      const bodyEl  = document.getElementById('toast-body');
+
+      titleEl.textContent = title;
+      bodyEl.textContent  = body;
+
+      toast.className = toast.className.replace(/toast-in|toast-out/, '').trim();
+
+      if (type === 'success') {
+        toast.className = 'rounded-3xl px-6 py-5 shadow-2xl border pointer-events-auto ' +
+          'bg-emerald-950 border-emerald-700 text-emerald-100 toast-in';
+        icon.className = 'w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0 mt-0.5 bg-emerald-800';
+        icon.innerHTML = '<svg class="w-6 h-6 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>';
+      } else {
+        toast.className = 'rounded-3xl px-6 py-5 shadow-2xl border pointer-events-auto ' +
+          'bg-red-950 border-red-700 text-red-100 toast-in';
+        icon.className = 'w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0 mt-0.5 bg-red-800';
+        icon.innerHTML = '<svg class="w-6 h-6 text-red-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>';
+      }
+
+      toast.classList.remove('hidden');
+
+      toastTimer = setTimeout(() => hideToast(), duration);
+    }
+
+    function hideToast() {
+      clearTimeout(toastTimer);
+      const toast = $toast();
+      toast.classList.add('toast-out');
+      setTimeout(() => {
+        toast.classList.add('hidden');
+        toast.classList.remove('toast-out');
+      }, 320);
+    }
+
+    // ─────────────────────────────────────────────
+    // INIT
+    // ─────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', () => {
+      updateSubmitState();
+      updateProblemPreview();
+
+      // Warn if GAS URL not set
+      if (!GAS_URL || GAS_URL === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE') {
+        setTimeout(() => {
+          showToast('error', '⚙️ Налаштування потрібні',
+            'Вставте URL Google Apps Script у змінну GAS_URL в index.html', 8000);
+        }, 1000);
+      }
+    });
+  </script>
+</body>
+</html>
