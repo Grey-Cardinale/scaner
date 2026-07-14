@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
@@ -44,38 +44,48 @@
 
   <!-- ==================== SETUP OVERLAY ==================== -->
   <div id="setup-overlay" class="fixed inset-0 z-50 bg-slate-900 flex flex-col items-center justify-center px-4">
+    <!-- Setup Language Switcher -->
+    <div class="absolute top-4 right-4 flex gap-1 bg-slate-800 rounded-lg p-1">
+      <button onclick="setLang('ua')" id="setup-lang-ua" class="px-2.5 py-1 text-xs font-bold rounded-md text-slate-400">UA</button>
+      <button onclick="setLang('en')" id="setup-lang-en" class="px-2.5 py-1 text-xs font-bold rounded-md bg-slate-700 text-white">EN</button>
+    </div>
+
     <div class="w-full max-w-md bg-slate-800 border border-slate-700 rounded-3xl p-6 shadow-2xl space-y-5">
       <div class="text-center">
-        <h2 class="text-2xl font-black text-white" data-i18n="setupTitle">Налаштування сесії</h2>
-        <p class="text-slate-400 text-sm mt-1" data-i18n="setupDesc">Введіть ваші дані для початку роботи</p>
+        <h2 class="text-2xl font-black text-white" data-i18n="setupTitle">Session Setup</h2>
+        <p class="text-slate-400 text-sm mt-1" data-i18n="setupDesc">Enter your details to start</p>
       </div>
       <div class="space-y-4">
         <div>
-          <label class="block text-xs font-semibold text-slate-400 uppercase tracking-widest mb-1.5" data-i18n="setupUser">Ваше Ім'я</label>
-          <input id="setup-user" type="text" class="input-glow w-full bg-slate-900 border border-slate-600 rounded-xl px-4 py-3.5 text-white" placeholder="Ivanov I.">
+          <label class="block text-xs font-semibold text-slate-400 uppercase tracking-widest mb-1.5" data-i18n="setupUser">Full first name & last name initial</label>
+          <input id="setup-user" type="text" list="users-list" class="input-glow w-full bg-slate-900 border border-slate-600 rounded-xl px-4 py-3.5 text-white" placeholder="ARTEM T.">
         </div>
         <div>
-          <label class="block text-xs font-semibold text-slate-400 uppercase tracking-widest mb-1.5" data-i18n="setupProject">Назва Проекту</label>
-          <input id="setup-project" type="text" class="input-glow w-full bg-slate-900 border border-slate-600 rounded-xl px-4 py-3.5 text-white" placeholder="Batch_45">
+          <label class="block text-xs font-semibold text-slate-400 uppercase tracking-widest mb-1.5" data-i18n="setupProject">Project Name</label>
+          <input id="setup-project" type="text" list="projects-list" class="input-glow w-full bg-slate-900 border border-slate-600 rounded-xl px-4 py-3.5 text-white" placeholder="Batch_45">
         </div>
       </div>
-      <button onclick="saveSetup()" class="w-full py-4 rounded-2xl font-bold text-lg bg-brand-600 hover:bg-brand-500 text-white shadow-lg active:scale-95 transition-transform" data-i18n="setupBtn">ПОЧАТИ РОБОТУ</button>
+      <button onclick="saveSetup()" class="w-full py-4 rounded-2xl font-bold text-lg bg-brand-600 hover:bg-brand-500 text-white shadow-lg active:scale-95 transition-transform" data-i18n="setupBtn">START WORKING</button>
     </div>
   </div>
+
+  <datalist id="users-list"></datalist>
+  <datalist id="projects-list"></datalist>
 
   <!-- ==================== TOP BAR ==================== -->
   <div class="sticky top-0 z-30 bg-slate-900/80 backdrop-blur-md border-b border-slate-800 px-4 py-3 flex items-center justify-between">
     <div class="flex items-center gap-3">
       <div class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_#34d399]"></div>
       <div class="text-xs">
-        <p class="text-slate-400 font-medium"><span data-i18n="topUser">Юзер:</span> <strong id="top-user-val" class="text-white"></strong></p>
-        <p class="text-slate-400 font-medium"><span data-i18n="topProject">Проект:</span> <strong id="top-project-val" class="text-white"></strong></p>
+        <p class="text-slate-400 font-medium"><span data-i18n="topUser">User:</span> <strong id="top-user-val" class="text-white"></strong></p>
+        <p class="text-slate-400 font-medium"><span data-i18n="topProject">Project:</span> <strong id="top-project-val" class="text-white"></strong></p>
       </div>
-      <button onclick="openSetup()" class="text-[10px] uppercase font-bold text-brand-400 bg-brand-900/30 px-2 py-1 rounded-md active:bg-brand-900/60" data-i18n="changeSession">Змінити</button>
+      <button onclick="openSetup()" class="text-[10px] uppercase font-bold text-brand-400 bg-brand-900/30 px-2 py-1 rounded-md active:bg-brand-900/60" data-i18n="changeSession">Change</button>
     </div>
+    <!-- Main Language Switcher -->
     <div class="flex gap-1 bg-slate-800 rounded-lg p-1">
-      <button onclick="setLang('ua')" id="lang-ua" class="px-2.5 py-1 text-xs font-bold rounded-md bg-slate-700 text-white">UA</button>
-      <button onclick="setLang('en')" id="lang-en" class="px-2.5 py-1 text-xs font-bold rounded-md text-slate-400">EN</button>
+      <button onclick="setLang('ua')" id="lang-ua" class="px-2.5 py-1 text-xs font-bold rounded-md text-slate-400">UA</button>
+      <button onclick="setLang('en')" id="lang-en" class="px-2.5 py-1 text-xs font-bold rounded-md bg-slate-700 text-white">EN</button>
     </div>
   </div>
 
@@ -86,12 +96,12 @@
     <div class="bg-slate-800/70 border border-slate-700/60 rounded-3xl p-5 space-y-4">
       <div class="flex items-center gap-2 mb-1">
         <div class="w-1 h-6 bg-brand-500 rounded-full"></div>
-        <h2 class="font-bold text-white text-lg" data-i18n="serialLabel">Серійний номер</h2>
+        <h2 class="font-bold text-white text-lg" data-i18n="serialLabel">Serial number</h2>
       </div>
 
       <button id="btn-camera" onclick="toggleCamera()" class="w-full py-5 rounded-2xl font-bold text-lg transition-all active:scale-95 bg-brand-600 text-white flex items-center justify-center gap-3">
         <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><circle cx="12" cy="13" r="3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></svg>
-        <span id="btn-camera-text" data-i18n="cameraOn">УВІМКНУТИ КАМЕРУ</span>
+        <span id="btn-camera-text" data-i18n="cameraOn">TURN ON CAMERA</span>
       </button>
 
       <div id="scanner-wrapper" class="hidden relative">
@@ -102,7 +112,7 @@
       </div>
 
       <div class="relative">
-        <input id="serial-input" type="text" data-i18n-placeholder="serialPlaceholder" placeholder="Відскануйте або введіть вручну…" oninput="updateSubmitState()" class="input-glow w-full bg-slate-900 border border-slate-600 rounded-xl px-4 py-4 text-white text-base font-mono pr-12" autocomplete="off" />
+        <input id="serial-input" type="text" data-i18n-placeholder="serialPlaceholder" placeholder="Scan or type manually..." oninput="updateSubmitState()" class="input-glow w-full bg-slate-900 border border-slate-600 rounded-xl px-4 py-4 text-white text-base font-mono pr-12" autocomplete="off" />
         <button id="btn-clear-serial" onclick="clearSerial()" class="hidden absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-slate-400 hover:text-white"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
       </div>
     </div>
@@ -111,20 +121,20 @@
     <div class="bg-slate-800/70 border border-slate-700/60 rounded-3xl p-5">
       <div class="flex items-center gap-2 mb-4">
         <div class="w-1 h-6 bg-violet-500 rounded-full"></div>
-        <h2 class="font-bold text-white text-lg" data-i18n="itemLabel">Позиція панелі (Item)</h2>
+        <h2 class="font-bold text-white text-lg" data-i18n="itemLabel">Panel Position (Item)</h2>
       </div>
       <div class="grid grid-cols-2 gap-3 mb-2">
         <button onclick="selectItem('LT')" id="item-LT" class="item-btn bg-slate-900 border-2 border-slate-600 rounded-2xl p-5 active:scale-95">
-          <div class="text-2xl font-black text-white">LT</div><div class="text-xs text-slate-400 mt-1 font-medium" data-i18n="itemLT">Ліво · Верх</div>
+          <div class="text-2xl font-black text-white">LT</div><div class="text-xs text-slate-400 mt-1 font-medium" data-i18n="itemLT">Left · Top</div>
         </button>
         <button onclick="selectItem('RT')" id="item-RT" class="item-btn bg-slate-900 border-2 border-slate-600 rounded-2xl p-5 active:scale-95">
-          <div class="text-2xl font-black text-white">RT</div><div class="text-xs text-slate-400 mt-1 font-medium" data-i18n="itemRT">Право · Верх</div>
+          <div class="text-2xl font-black text-white">RT</div><div class="text-xs text-slate-400 mt-1 font-medium" data-i18n="itemRT">Right · Top</div>
         </button>
         <button onclick="selectItem('LB')" id="item-LB" class="item-btn bg-slate-900 border-2 border-slate-600 rounded-2xl p-5 active:scale-95">
-          <div class="text-2xl font-black text-white">LB</div><div class="text-xs text-slate-400 mt-1 font-medium" data-i18n="itemLB">Ліво · Низ</div>
+          <div class="text-2xl font-black text-white">LB</div><div class="text-xs text-slate-400 mt-1 font-medium" data-i18n="itemLB">Left · Bottom</div>
         </button>
         <button onclick="selectItem('RB')" id="item-RB" class="item-btn bg-slate-900 border-2 border-slate-600 rounded-2xl p-5 active:scale-95">
-          <div class="text-2xl font-black text-white">RB</div><div class="text-xs text-slate-400 mt-1 font-medium" data-i18n="itemRB">Право · Низ</div>
+          <div class="text-2xl font-black text-white">RB</div><div class="text-xs text-slate-400 mt-1 font-medium" data-i18n="itemRB">Right · Bottom</div>
         </button>
       </div>
     </div>
@@ -133,11 +143,11 @@
     <div class="bg-slate-800/70 border border-slate-700/60 rounded-3xl p-5 space-y-5">
       <div class="flex items-center gap-2 mb-1">
         <div class="w-1 h-6 bg-amber-500 rounded-full"></div>
-        <h2 class="font-bold text-white text-lg" data-i18n="problemLabel">Опис поломки</h2>
+        <h2 class="font-bold text-white text-lg" data-i18n="problemLabel">Problem / Notes</h2>
       </div>
       <div class="bg-slate-900/60 border border-slate-700/40 rounded-2xl p-4">
         <div class="flex items-center justify-between mb-3">
-          <div><p class="font-semibold text-white" data-i18n="pixels">🔴 Пікселі</p><p class="text-xs text-slate-400 mt-0.5" data-i18n="pixelsSub">Кількість битих пікселів</p></div>
+          <div><p class="font-semibold text-white" data-i18n="pixels">🔴 Pixels</p><p class="text-xs text-slate-400 mt-0.5" data-i18n="pixelsSub">Number of broken pixels</p></div>
         </div>
         <div class="flex items-center justify-center gap-6">
           <button onclick="changePixels(-1)" class="counter-btn w-16 h-16 rounded-2xl bg-slate-800 border border-slate-600 text-white text-3xl font-bold">−</button>
@@ -146,27 +156,27 @@
         </div>
       </div>
       <div class="bg-slate-900/60 border border-slate-700/40 rounded-2xl p-4 flex items-center justify-between">
-        <div><p class="font-semibold text-white" data-i18n="shader">🌈 Шейдер</p><p class="text-xs text-slate-400 mt-0.5" data-i18n="shaderSub">Проблема з шейдером</p></div>
-        <button id="toggle-shader" onclick="toggleShader()" class="toggle-btn bg-slate-800 border-2 border-slate-600 rounded-2xl px-8 py-4 font-bold text-lg text-slate-400 active:scale-95" data-i18n="shaderBtn">Шейдер</button>
+        <div><p class="font-semibold text-white" data-i18n="shader">🌈 Shader</p><p class="text-xs text-slate-400 mt-0.5" data-i18n="shaderSub">Shader problem</p></div>
+        <button id="toggle-shader" onclick="toggleShader()" class="toggle-btn bg-slate-800 border-2 border-slate-600 rounded-2xl px-8 py-4 font-bold text-lg text-slate-400 active:scale-95" data-i18n="shaderBtn">Shader</button>
       </div>
       <div>
-        <label class="block text-xs font-semibold text-slate-400 mb-2" data-i18n="notesLabel">📝 Додаткові нотатки (необов'язково)</label>
-        <textarea id="notes-input" data-i18n-placeholder="notesPlaceholder" placeholder="Введіть додатковий опис…" rows="2" class="input-glow w-full bg-slate-900 border border-slate-600 rounded-xl px-4 py-3 text-white text-base resize-none"></textarea>
+        <label class="block text-xs font-semibold text-slate-400 mb-2" data-i18n="notesLabel">📝 Additional notes (optional)</label>
+        <textarea id="notes-input" data-i18n-placeholder="notesPlaceholder" placeholder="Enter extra description..." rows="2" class="input-glow w-full bg-slate-900 border border-slate-600 rounded-xl px-4 py-3 text-white text-base resize-none"></textarea>
       </div>
     </div>
 
     <!-- BLOCK 4: Submit & Counter -->
     <div class="space-y-4">
-      <div id="submit-hint" class="text-center text-slate-500 text-sm py-1" data-i18n="submitFill">Заповніть серійний номер та виберіть позицію</div>
+      <div id="submit-hint" class="text-center text-slate-500 text-sm py-1" data-i18n="submitFill">Fill serial number and select position</div>
       <button id="btn-submit" onclick="submitData()" disabled class="w-full py-6 rounded-3xl font-black text-xl tracking-wide transition-all bg-slate-700 text-slate-500 cursor-not-allowed flex items-center justify-center gap-3">
-        <span id="submit-text" data-i18n="submitBtn">ВІДПРАВИТИ ДАНІ</span>
+        <span id="submit-text" data-i18n="submitBtn">SUBMIT DATA</span>
       </button>
       <div class="text-center text-sm font-semibold text-brand-300 bg-brand-900/20 py-2 rounded-xl border border-brand-900/50">
-        <span data-i18n="counterText">Перевірено вами в цьому проекті:</span> <span id="session-counter" class="text-white text-lg">0</span> шт.
+        <span data-i18n="counterText">Checked by you in this project:</span> <span id="session-counter" class="text-white text-lg">0</span> <span data-i18n="counterSuffix">pcs.</span>
       </div>
       
       <button onclick="openExportModal()" class="w-full py-4 rounded-xl border-2 border-slate-600 text-slate-300 font-bold hover:bg-slate-800 active:scale-95 transition-all" data-i18n="exportMainBtn">
-        ЗАКІНЧИТИ АРКУШ / ЕКСПОРТ
+        FINISH SHEET / EXPORT
       </button>
     </div>
   </div>
@@ -174,10 +184,10 @@
   <!-- ==================== EXPORT MODAL ==================== -->
   <div id="export-modal" class="hidden fixed inset-0 z-50 bg-black/70 flex items-center justify-center px-4 backdrop-blur-sm">
     <div class="w-full max-w-md bg-slate-800 border border-slate-700 rounded-3xl p-6 shadow-2xl space-y-4 text-center">
-      <h2 class="text-xl font-black text-white" data-i18n="exportTitle">Експорт звіту</h2>
-      <button onclick="doExport('personal')" class="w-full py-4 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-bold active:scale-95" data-i18n="exportPersonal">Завантажити мій особистий звіт</button>
-      <button onclick="doExport('project')" class="w-full py-4 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-bold active:scale-95" data-i18n="exportProject">Завантажити спільний звіт по проекту</button>
-      <button onclick="closeExportModal()" class="w-full py-3 rounded-xl border border-slate-600 text-slate-400 hover:text-white font-semibold mt-2" data-i18n="cancelBtn">Скасувати</button>
+      <h2 class="text-xl font-black text-white" data-i18n="exportTitle">Export Report</h2>
+      <button onclick="doExport('personal')" class="w-full py-4 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-bold active:scale-95" data-i18n="exportPersonal">Download my personal report</button>
+      <button onclick="doExport('project')" class="w-full py-4 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-bold active:scale-95" data-i18n="exportProject">Download shared project report</button>
+      <button onclick="closeExportModal()" class="w-full py-3 rounded-xl border border-slate-600 text-slate-400 hover:text-white font-semibold mt-2" data-i18n="cancelBtn">Cancel</button>
     </div>
   </div>
 
@@ -185,7 +195,7 @@
   <div id="loading-overlay" class="hidden fixed inset-0 z-50 bg-black/70 flex items-center justify-center backdrop-blur-sm">
     <div class="bg-slate-800 border border-slate-600 rounded-3xl p-8 text-center shadow-2xl max-w-xs w-full mx-4">
       <div class="w-16 h-16 mx-auto mb-4 border-4 border-slate-700 border-t-brand-500 rounded-full animate-spin"></div>
-      <p id="loading-text" class="font-black text-white text-lg" data-i18n="loading">Відправка даних…</p>
+      <p id="loading-text" class="font-black text-white text-lg" data-i18n="loading">Sending data...</p>
     </div>
   </div>
 
@@ -204,29 +214,15 @@
     // ─────────────────────────────────────────────
     // НАЛАШТУВАННЯ
     // ─────────────────────────────────────────────
-      const GAS_URL = 'https://script.google.com/macros/s/AKfycbytXu4ZxpSK3HePro0gJYg7OjMWY-Xe5tAt_tvFZg42xv_LNJ5y2mdeN5q2QA0wNKZmHQ/exec'; // Замініть на ваш URL Web App!
+    const GAS_URL = 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE'; // Замініть на ваш URL Web App!
 
     // ─────────────────────────────────────────────
     // ІНТЕРНАЦІОНАЛІЗАЦІЯ (i18n)
     // ─────────────────────────────────────────────
     const i18n = {
-      ua: {
-        setupTitle: "Налаштування сесії", setupDesc: "Введіть ваші дані для початку роботи",
-        setupUser: "Ваше Ім'я (напр. Ivanov I.)", setupProject: "Назва Проекту (напр. Batch_45)", setupBtn: "ПОЧАТИ РОБОТУ",
-        topUser: "Юзер:", topProject: "Проект:", changeSession: "Змінити",
-        serialLabel: "Серійний номер", cameraOn: "УВІМКНУТИ КАМЕРУ", cameraOff: "ВИМКНУТИ КАМЕРУ", serialPlaceholder: "Відскануйте або введіть вручну…",
-        itemLabel: "Позиція панелі (Item)", itemLT: "Ліво · Верх", itemRT: "Право · Верх", itemLB: "Ліво · Низ", itemRB: "Право · Низ",
-        problemLabel: "Опис поломки", pixels: "🔴 Пікселі", pixelsSub: "Кількість битих пікселів",
-        shader: "🌈 Шейдер", shaderSub: "Проблема з шейдером", shaderBtn: "Шейдер",
-        notesLabel: "📝 Додаткові нотатки (необов'язково)", notesPlaceholder: "Введіть додатковий опис…",
-        submitReady: "Все готово до відправки!", submitFill: "Заповніть серійний номер та виберіть позицію", submitBtn: "ВІДПРАВИТИ ДАНІ",
-        counterText: "Перевірено вами в цьому проекті:", exportMainBtn: "ЗАКІНЧИТИ АРКУШ / ЕКСПОРТ",
-        exportTitle: "Експорт звіту", exportPersonal: "Завантажити мій особистий звіт", exportProject: "Завантажити спільний звіт по проекту",
-        cancelBtn: "Скасувати", loading: "Відправка даних…", exporting: "Генерація Excel файлу…"
-      },
       en: {
         setupTitle: "Session Setup", setupDesc: "Enter your details to start",
-        setupUser: "Your Name (e.g. Ivanov I.)", setupProject: "Project Name (e.g. Batch_45)", setupBtn: "START WORKING",
+        setupUser: "Full first name & last name initial (e.g. ARTEM T.)", setupProject: "Project Name (e.g. Batch_45)", setupBtn: "START WORKING",
         topUser: "User:", topProject: "Project:", changeSession: "Change",
         serialLabel: "Serial number", cameraOn: "TURN ON CAMERA", cameraOff: "TURN OFF CAMERA", serialPlaceholder: "Scan or type manually...",
         itemLabel: "Panel Position (Item)", itemLT: "Left · Top", itemRT: "Right · Top", itemLB: "Left · Bottom", itemRB: "Right · Bottom",
@@ -234,9 +230,23 @@
         shader: "🌈 Shader", shaderSub: "Shader problem", shaderBtn: "Shader",
         notesLabel: "📝 Additional notes (optional)", notesPlaceholder: "Enter extra description...",
         submitReady: "Ready to submit!", submitFill: "Fill serial number and select position", submitBtn: "SUBMIT DATA",
-        counterText: "Checked by you in this project:", exportMainBtn: "FINISH SHEET / EXPORT",
+        counterText: "Checked by you in this project:", counterSuffix: "pcs.", exportMainBtn: "FINISH SHEET / EXPORT",
         exportTitle: "Export Report", exportPersonal: "Download my personal report", exportProject: "Download shared project report",
         cancelBtn: "Cancel", loading: "Sending data...", exporting: "Generating Excel file..."
+      },
+      ua: {
+        setupTitle: "Налаштування сесії", setupDesc: "Введіть ваші дані для початку роботи",
+        setupUser: "Повне ім'я та перша літера прізвища (напр. ARTEM T.)", setupProject: "Назва Проекту (напр. Batch_45)", setupBtn: "ПОЧАТИ РОБОТУ",
+        topUser: "Юзер:", topProject: "Проект:", changeSession: "Змінити",
+        serialLabel: "Серійний номер", cameraOn: "УВІМКНУТИ КАМЕРУ", cameraOff: "ВИМКНУТИ КАМЕРУ", serialPlaceholder: "Відскануйте або введіть вручну…",
+        itemLabel: "Позиція панелі (Item)", itemLT: "Ліво · Верх", itemRT: "Право · Верх", itemLB: "Ліво · Низ", itemRB: "Право · Низ",
+        problemLabel: "Опис поломки", pixels: "🔴 Пікселі", pixelsSub: "Кількість битих пікселів",
+        shader: "🌈 Шейдер", shaderSub: "Проблема з шейдером", shaderBtn: "Шейдер",
+        notesLabel: "📝 Додаткові нотатки (необов'язково)", notesPlaceholder: "Введіть додатковий опис…",
+        submitReady: "Все готово до відправки!", submitFill: "Заповніть серійний номер та виберіть позицію", submitBtn: "ВІДПРАВИТИ ДАНІ",
+        counterText: "Перевірено вами в цьому проекті:", counterSuffix: "шт.", exportMainBtn: "ЗАКІНЧИТИ АРКУШ / ЕКСПОРТ",
+        exportTitle: "Експорт звіту", exportPersonal: "Завантажити мій особистий звіт", exportProject: "Завантажити спільний звіт по проекту",
+        cancelBtn: "Скасувати", loading: "Відправка даних…", exporting: "Генерація Excel файлу…"
       }
     };
 
@@ -244,7 +254,7 @@
     // СТАН ДОДАТКУ
     // ─────────────────────────────────────────────
     let state = {
-      lang: 'ua',
+      lang: 'en', // Default to EN
       user: '',
       project: '',
       item: null,
@@ -255,18 +265,24 @@
       counter: 0
     };
 
+    let knownUsers = JSON.parse(localStorage.getItem('known_users') || '[]');
+    let knownProjects = JSON.parse(localStorage.getItem('known_projects') || '[]');
+
     const $ = id => document.getElementById(id);
 
     // ─────────────────────────────────────────────
     // ІНІЦІАЛІЗАЦІЯ
     // ─────────────────────────────────────────────
     window.onload = () => {
-      // Відновлення сесії з localStorage
+      populateDatalists();
+
+      const globalLang = localStorage.getItem('global_lang') || 'en';
       const savedUser = localStorage.getItem('last_user');
+      
       if (savedUser) {
         state.user = savedUser;
         state.project = localStorage.getItem(`project_${savedUser}`) || '';
-        state.lang = localStorage.getItem(`lang_${savedUser}`) || 'ua';
+        state.lang = localStorage.getItem(`lang_${savedUser}`) || globalLang;
         state.counter = parseInt(localStorage.getItem(`counter_${state.user}_${state.project}`) || '0');
         
         $('top-user-val').textContent = state.user;
@@ -274,6 +290,7 @@
         $('session-counter').textContent = state.counter;
         $('setup-overlay').classList.add('hidden');
       } else {
+        state.lang = globalLang;
         $('setup-overlay').classList.remove('hidden');
       }
       
@@ -291,20 +308,39 @@
       };
     };
 
+    function populateDatalists() {
+      const uList = $('users-list');
+      const pList = $('projects-list');
+      uList.innerHTML = ''; pList.innerHTML = '';
+      
+      knownUsers.sort().forEach(u => {
+        const opt = document.createElement('option'); opt.value = u; uList.appendChild(opt);
+      });
+      knownProjects.sort().forEach(p => {
+        const opt = document.createElement('option'); opt.value = p; pList.appendChild(opt);
+      });
+    }
+
     function saveSetup() {
       const u = $('setup-user').value.trim();
       const p = $('setup-project').value.trim();
-      if (!u || !p) return alert("Введіть ім'я та проект!");
+      if (!u || !p) return alert("Please fill in name and project!");
+      
+      // Add to known lists if new
+      if (!knownUsers.includes(u)) { knownUsers.push(u); localStorage.setItem('known_users', JSON.stringify(knownUsers)); }
+      if (!knownProjects.includes(p)) { knownProjects.push(p); localStorage.setItem('known_projects', JSON.stringify(knownProjects)); }
+      populateDatalists();
       
       state.user = u;
       state.project = p;
       
-      // Restore lang for this user if exists
-      state.lang = localStorage.getItem(`lang_${u}`) || 'ua';
+      // Restore lang for this user if exists, otherwise keep current selected lang
+      state.lang = localStorage.getItem(`lang_${u}`) || state.lang;
       state.counter = parseInt(localStorage.getItem(`counter_${u}_${p}`) || '0');
       
       localStorage.setItem('last_user', u);
       localStorage.setItem(`project_${u}`, p);
+      localStorage.setItem(`lang_${u}`, state.lang); // save current lang for this user
       
       $('top-user-val').textContent = u;
       $('top-project-val').textContent = p;
@@ -323,9 +359,15 @@
     function setLang(lang) {
       state.lang = lang;
       if (state.user) localStorage.setItem(`lang_${state.user}`, lang);
+      else localStorage.setItem('global_lang', lang);
       
+      // Update Main Switcher
       $('lang-ua').className = lang === 'ua' ? 'px-2.5 py-1 text-xs font-bold rounded-md bg-slate-700 text-white' : 'px-2.5 py-1 text-xs font-bold rounded-md text-slate-400';
       $('lang-en').className = lang === 'en' ? 'px-2.5 py-1 text-xs font-bold rounded-md bg-slate-700 text-white' : 'px-2.5 py-1 text-xs font-bold rounded-md text-slate-400';
+      
+      // Update Setup Switcher
+      $('setup-lang-ua').className = lang === 'ua' ? 'px-2.5 py-1 text-xs font-bold rounded-md bg-slate-700 text-white' : 'px-2.5 py-1 text-xs font-bold rounded-md text-slate-400';
+      $('setup-lang-en').className = lang === 'en' ? 'px-2.5 py-1 text-xs font-bold rounded-md bg-slate-700 text-white' : 'px-2.5 py-1 text-xs font-bold rounded-md text-slate-400';
       
       document.querySelectorAll('[data-i18n]').forEach(el => {
         el.textContent = i18n[lang][el.getAttribute('data-i18n')];
@@ -512,8 +554,6 @@
       try {
         const response = await fetch(GAS_URL, {
           method: 'POST',
-          // Mode depends on Google Apps Script configuration. 
-          // If you use standard text/plain we can avoid CORS preflight, but let's try direct.
           body: JSON.stringify(payload)
         });
         
@@ -530,7 +570,6 @@
         showToast('error', 'NETWORK ERROR ❌', "Using 'no-cors' mode might be required, or the script failed.");
         
         // Fallback for CORS issues if user didn't set up deployment properly
-        // In no-cors, we can't read the response. We assume success if saving.
         if (payload.action === 'save' && err.message.includes('Failed to fetch')) {
             try {
                await fetch(GAS_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
