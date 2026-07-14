@@ -296,7 +296,7 @@
         counterText: "Checked by you in this project:", counterSuffix: "pcs.", exportMainBtn: "FINISH SHEET / EXPORT",
         exportTitle: "Export Report", exportPersonal: "Download my personal report", exportProject: "Download shared project report",
         cancelBtn: "Cancel", loading: "Sending data...", exporting: "Generating Excel file...", fetchingData: "Fetching global users...",
-        dupWarning: "⚠️ This panel is already in the project!", dupAddedBy: "Added by:", dupPos: "Pos:", dupDelBtn: "DELETE SERIAL FROM PROJECT", dupOverwriteBtn: "OVERWRITE DATA",
+        dupWarning: "⚠️ This panel is already in the project!", dupAddedBy: "Added by:", dupPos: "Pos:", dupDelBtn: "DELETE SERIAL FROM PROJECT", dupOverwriteBtn: "OVERWRITE DATA", checking: "CHECKING SERIAL...", checkingHint: "Please wait...",
         undoBtn: "↩️ Undo last scan (Serial: ", undoConfirm: "Are you sure you want to completely delete serial ", undoSuccess: "Undo successful!",
         offlineMode: "OFFLINE MODE - Scans will be saved locally", syncing: "Syncing offline data...", syncSuccess: "All offline data synced!"
       },
@@ -318,7 +318,7 @@
         counterText: "Перевірено вами в цьому проекті:", counterSuffix: "шт.", exportMainBtn: "ЗАКІНЧИТИ АРКУШ / ЕКСПОРТ",
         exportTitle: "Експорт звіту", exportPersonal: "Завантажити мій особистий звіт", exportProject: "Завантажити спільний звіт по проекту",
         cancelBtn: "Скасувати", loading: "Відправка даних…", exporting: "Генерація Excel файлу…", fetchingData: "Завантаження списку...",
-        dupWarning: "⚠️ Ця панель вже є в поточному проекті!", dupAddedBy: "Додав:", dupPos: "Позиція:", dupDelBtn: "ВИДАЛИТИ ПАНЕЛЬ З ПРОЕКТУ", dupOverwriteBtn: "ПЕРЕЗАПИСАТИ ДАНІ",
+        dupWarning: "⚠️ Ця панель вже є в поточному проекті!", dupAddedBy: "Додав:", dupPos: "Позиція:", dupDelBtn: "ВИДАЛИТИ ПАНЕЛЬ З ПРОЕКТУ", dupOverwriteBtn: "ПЕРЕЗАПИСАТИ ДАНІ", checking: "ПЕРЕВІРКА...", checkingHint: "Будь ласка, зачекайте...",
         undoBtn: "↩️ Скасувати (Серійник: ", undoConfirm: "Ви впевнені, що хочете повністю видалити серійний номер ", undoSuccess: "Скасовано успішно!",
         offlineMode: "ОФЛАЙН РЕЖИМ - Дані зберігаються локально", syncing: "Синхронізація офлайн даних...", syncSuccess: "Всі офлайн дані збережено!"
       },
@@ -340,7 +340,7 @@
         counterText: "Von Ihnen in diesem Projekt geprüft:", counterSuffix: "Stk.", exportMainBtn: "BLATT BEENDEN / EXPORT",
         exportTitle: "Bericht exportieren", exportPersonal: "Meinen persönlichen Bericht herunterladen", exportProject: "Geteilten Projektbericht herunterladen",
         cancelBtn: "Abbrechen", loading: "Daten senden...", exporting: "Excel-Datei wird generiert...", fetchingData: "Globale Benutzer abrufen...",
-        dupWarning: "⚠️ Dieses Panel ist bereits im Projekt!", dupAddedBy: "Hinzugefügt von:", dupPos: "Pos:", dupDelBtn: "SERIENNUMMER AUS PROJEKT LÖSCHEN", dupOverwriteBtn: "DATEN ÜBERSCHREIBEN",
+        dupWarning: "⚠️ Dieses Panel ist bereits im Projekt!", dupAddedBy: "Hinzugefügt von:", dupPos: "Pos:", dupDelBtn: "SERIENNUMMER AUS PROJEKT LÖSCHEN", dupOverwriteBtn: "DATEN ÜBERSCHREIBEN", checking: "WIRD GEPRÜFT...", checkingHint: "Bitte warten...",
         undoBtn: "↩️ Rückgängig (Seriennr: ", undoConfirm: "Möchten Sie Seriennummer vollständig löschen: ", undoSuccess: "Erfolgreich rückgängig gemacht!",
         offlineMode: "OFFLINE-MODUS - Scans werden lokal gespeichert", syncing: "Offline-Daten synchronisieren...", syncSuccess: "Alle Offline-Daten gespeichert!"
       }
@@ -348,18 +348,9 @@
 
     let state = {
       lang: 'en',
-      theme: 'dark',
-      isOnline: navigator.onLine,
-      user: '',
-      project: '',
-      item: null,
-      px: 0,
-      shader: false,
-      cameraRunning: false,
-      html5QrCode: null,
-      counter: 0,
-      duplicateData: null,
-      sessionHistory: []
+      user: '', project: '', item: null, px: 0, shader: false, cameraRunning: false, duplicateData: null,
+      html5QrCode: null, theme: 'light', isOnline: navigator.onLine, sessionHistory: [], counter: 0,
+      isCheckingSerial: false
     };
 
     let globalUserProjects = {};
@@ -617,27 +608,32 @@
     let serialCheckTimer = null;
     function onSerialInput() {
       clearTimeout(serialCheckTimer);
-      let serial = $('serial-input').value.trim();
+      let serial = $('serial-input').value.toUpperCase().replace(/\s/g, '');
       
-      if (/^\d{5}$/.test(serial)) {
-        serial = 'BP39S00' + serial;
+      const parts = serial.match(/^(\d{5})$/);
+      if (parts) {
+        serial = 'BP39S00' + parts[1];
         $('serial-input').value = serial;
       }
-      
-      $('btn-clear-serial').classList.toggle('hidden', !serial);
-      
+
       if (!serial) {
+        state.isCheckingSerial = false;
         resetDuplicateState();
-        updateSubmitState();
         return;
       }
       
-      serialCheckTimer = setTimeout(() => { checkSerial(serial); }, 600);
+      state.isCheckingSerial = true;
       updateSubmitState();
+      
+      serialCheckTimer = setTimeout(() => { checkSerial(serial); }, 600);
     }
 
     async function checkSerial(serial) {
-      if (!state.project) return;
+      if (!state.project) {
+        state.isCheckingSerial = false;
+        updateSubmitState();
+        return;
+      }
       
       if (!state.isOnline) {
         const queueKey = `syncQueue_${state.user}_${state.project}`;
@@ -650,10 +646,20 @@
         } else {
           resetDuplicateState();
         }
+        
+        if ($('serial-input').value.trim() === serial) {
+          state.isCheckingSerial = false;
+          updateSubmitState();
+        }
         return;
       }
 
-      if (GAS_URL.includes('YOUR_GOOGLE')) return;
+      if (GAS_URL.includes('YOUR_GOOGLE')) {
+        state.isCheckingSerial = false;
+        updateSubmitState();
+        return;
+      }
+      
       const payload = { action: 'check_serial', project: state.project, serial: serial };
       try {
         const response = await fetch(GAS_URL, { method: 'POST', body: JSON.stringify(payload) });
@@ -665,7 +671,12 @@
         } else if ($('serial-input').value.trim() === serial) {
           resetDuplicateState();
         }
-      } catch(e) {}
+      } catch(e) {} finally {
+        if ($('serial-input').value.trim() === serial) {
+          state.isCheckingSerial = false;
+          updateSubmitState();
+        }
+      }
     }
 
     function showDuplicateWarning(data) {
@@ -756,6 +767,16 @@
       $('btn-clear-serial').classList.toggle('hidden', !serial);
       
       const btn = $('btn-submit');
+      
+      if (state.isCheckingSerial) {
+        btn.disabled = true;
+        btn.className = "w-full py-6 rounded-3xl font-black text-xl tracking-wide transition-all bg-slate-200 dark:bg-slate-700 text-slate-500 cursor-wait flex items-center justify-center gap-3";
+        $('submit-text').textContent = i18n[state.lang].checking || "CHECKING...";
+        $('submit-hint').textContent = i18n[state.lang].checkingHint || "Please wait...";
+        $('submit-hint').className = "text-center text-slate-500 dark:text-slate-400 text-sm py-1 animate-pulse";
+        return;
+      }
+
       if (ready) {
         btn.disabled = false;
         if (state.duplicateData) {
