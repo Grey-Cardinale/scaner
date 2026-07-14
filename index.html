@@ -43,33 +43,62 @@
 <body class="text-slate-100 select-none relative">
 
   <!-- ==================== SETUP OVERLAY ==================== -->
-  <div id="setup-overlay" class="fixed inset-0 z-50 bg-slate-900 flex flex-col items-center justify-center px-4">
+  <div id="setup-overlay" class="fixed inset-0 z-50 bg-slate-900 flex flex-col items-center justify-center px-4 overflow-y-auto pt-10 pb-10">
     <!-- Setup Language Switcher -->
     <div class="absolute top-4 right-4 flex gap-1 bg-slate-800 rounded-lg p-1">
       <button onclick="setLang('ua')" id="setup-lang-ua" class="px-2.5 py-1 text-xs font-bold rounded-md text-slate-400">UA</button>
       <button onclick="setLang('en')" id="setup-lang-en" class="px-2.5 py-1 text-xs font-bold rounded-md bg-slate-700 text-white">EN</button>
     </div>
 
-    <div class="w-full max-w-md bg-slate-800 border border-slate-700 rounded-3xl p-6 shadow-2xl space-y-5">
+    <div class="w-full max-w-md bg-slate-800 border border-slate-700 rounded-3xl p-6 shadow-2xl space-y-5 my-auto">
       <div class="text-center">
         <h2 class="text-2xl font-black text-white" data-i18n="setupTitle">Session Setup</h2>
         <p class="text-slate-400 text-sm mt-1" data-i18n="setupDesc">Enter your details to start</p>
       </div>
+      
       <div class="space-y-4">
         <div>
-          <label class="block text-xs font-semibold text-slate-400 uppercase tracking-widest mb-1.5" data-i18n="setupUser">Full first name & last name initial</label>
-          <input id="setup-user" type="text" list="users-list" oninput="onUserSetupInput()" class="input-glow w-full bg-slate-900 border border-slate-600 rounded-xl px-4 py-3.5 text-white" placeholder="ARTEM T.">
+          <label class="block text-xs font-semibold text-slate-400 uppercase tracking-widest mb-1.5">
+            <span data-i18n="setupUser">Full first name & last name initial</span>
+            <span class="block text-[10px] font-normal text-slate-500 mt-0.5 normal-case" data-i18n="setupListHint">Start typing or click arrow to see saved options</span>
+          </label>
+          <div class="relative">
+            <input id="setup-user" type="text" list="users-list" oninput="onUserSetupInput()" class="input-glow w-full bg-slate-900 border border-slate-600 rounded-xl px-4 py-3.5 text-white pr-12" placeholder="ARTEM T.">
+            <button type="button" onclick="clearSetupUser()" class="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-slate-500 hover:text-white hidden" id="clear-user-btn">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+          </div>
         </div>
+        
         <div>
-          <label class="block text-xs font-semibold text-slate-400 uppercase tracking-widest mb-1.5" data-i18n="setupProject">Project Name</label>
-          <input id="setup-project" type="text" list="projects-list" class="input-glow w-full bg-slate-900 border border-slate-600 rounded-xl px-4 py-3.5 text-white" placeholder="Batch_45">
+          <label class="block text-xs font-semibold text-slate-400 uppercase tracking-widest mb-1.5">
+            <span data-i18n="setupProject">Project Name</span>
+            <span class="block text-[10px] font-normal text-slate-500 mt-0.5 normal-case" data-i18n="setupListHint">Start typing or click arrow to see saved options</span>
+          </label>
+          <div class="relative">
+            <input id="setup-project" type="text" list="projects-list" oninput="onProjectSetupInput()" class="input-glow w-full bg-slate-900 border border-slate-600 rounded-xl px-4 py-3.5 text-white pr-12" placeholder="Batch_45">
+            <button type="button" onclick="clearSetupProject()" class="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-slate-500 hover:text-white hidden" id="clear-project-btn">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+          </div>
         </div>
       </div>
       
       <!-- Loading indicator for global list fetch -->
       <div id="setup-loading" class="hidden text-center text-brand-400 text-xs font-semibold animate-pulse" data-i18n="fetchingData">Fetching global users...</div>
 
-      <button id="btn-setup-start" onclick="saveSetup()" class="w-full py-4 rounded-2xl font-bold text-lg bg-brand-600 hover:bg-brand-500 text-white shadow-lg active:scale-95 transition-transform" data-i18n="setupBtn">START WORKING</button>
+      <div class="flex gap-3 mt-2">
+        <button id="btn-setup-cancel" onclick="closeSetup()" class="hidden py-4 px-5 rounded-2xl font-bold text-lg bg-slate-700 hover:bg-slate-600 text-white shadow-lg active:scale-95 transition-transform">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+        <button id="btn-setup-start" onclick="saveSetup()" class="flex-1 py-4 rounded-2xl font-bold text-lg bg-brand-600 hover:bg-brand-500 text-white shadow-lg active:scale-95 transition-transform" data-i18n="setupBtn">START WORKING</button>
+      </div>
+
+      <!-- Reset Cache Button -->
+      <button onclick="clearAllData()" class="text-xs font-semibold text-slate-500 hover:text-red-400 mt-6 pt-4 border-t border-slate-700/50 block w-full text-center transition-colors" data-i18n="clearDataBtn">
+        Reset all local data (Clear Cache)
+      </button>
+
     </div>
   </div>
 
@@ -218,7 +247,7 @@
     // ─────────────────────────────────────────────
     // НАЛАШТУВАННЯ
     // ─────────────────────────────────────────────
-      const GAS_URL = 'https://script.google.com/macros/s/AKfycbxuB8e-V3FIIJ5MkQEJneFtiAqJfS4X_FbIu4pEZHXK7J2_EMCP202xbOYa24-1PJ8zCg/exec'; // Замініть на ваш URL Web App!
+    const GAS_URL = 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE'; // Замініть на ваш URL Web App!
 
     // ─────────────────────────────────────────────
     // ІНТЕРНАЦІОНАЛІЗАЦІЯ (i18n)
@@ -226,7 +255,9 @@
     const i18n = {
       en: {
         setupTitle: "Session Setup", setupDesc: "Enter your details to start",
-        setupUser: "Full first name & last name initial (e.g. ARTEM T.)", setupProject: "Project Name (e.g. Batch_45)", setupBtn: "START WORKING",
+        setupUser: "Full first name & last name initial", setupProject: "Project Name", setupBtn: "START WORKING",
+        setupListHint: "Start typing or click arrow to see saved options", clearDataBtn: "Clear browser cache",
+        confirmClear: "Are you sure you want to clear the browser cache?",
         topUser: "User:", topProject: "Project:", changeSession: "Change",
         serialLabel: "Serial number", cameraOn: "TURN ON CAMERA", cameraOff: "TURN OFF CAMERA", serialPlaceholder: "Scan or type manually...",
         itemLabel: "Panel Position (Item)", itemLT: "Left · Top", itemRT: "Right · Top", itemLB: "Left · Bottom", itemRB: "Right · Bottom",
@@ -240,7 +271,9 @@
       },
       ua: {
         setupTitle: "Налаштування сесії", setupDesc: "Введіть ваші дані для початку роботи",
-        setupUser: "Повне ім'я та перша літера прізвища (напр. ARTEM T.)", setupProject: "Назва Проекту (напр. Batch_45)", setupBtn: "ПОЧАТИ РОБОТУ",
+        setupUser: "Повне ім'я та перша літера прізвища", setupProject: "Назва Проекту", setupBtn: "ПОЧАТИ РОБОТУ",
+        setupListHint: "Почніть вводити або натисніть стрілку для вибору", clearDataBtn: "Очистити кеш браузера",
+        confirmClear: "Ви впевнені, що хочете очистити кеш браузера?",
         topUser: "Юзер:", topProject: "Проект:", changeSession: "Змінити",
         serialLabel: "Серійний номер", cameraOn: "УВІМКНУТИ КАМЕРУ", cameraOff: "ВИМКНУТИ КАМЕРУ", serialPlaceholder: "Відскануйте або введіть вручну…",
         itemLabel: "Позиція панелі (Item)", itemLT: "Ліво · Верх", itemRT: "Право · Верх", itemLB: "Ліво · Низ", itemRB: "Право · Низ",
@@ -293,14 +326,12 @@
       } else {
         state.lang = globalLang;
         $('setup-overlay').classList.remove('hidden');
+        $('btn-setup-cancel').classList.add('hidden');
       }
       
       setLang(state.lang);
-      
-      // Завантажуємо глобальний список з бекенду (Code.gs має повертати JSON на GET запит)
       fetchGlobalData();
       
-      // Підключення Tailwind кольорів до config
       tailwind.config = {
         theme: {
           extend: {
@@ -313,14 +344,14 @@
     };
 
     async function fetchGlobalData() {
-      if (GAS_URL.includes('YOUR_GOOGLE')) return; // skip if not configured
+      if (GAS_URL.includes('YOUR_GOOGLE')) return;
       
       $('setup-loading').classList.remove('hidden');
       $('btn-setup-start').disabled = true;
       $('btn-setup-start').classList.add('opacity-50', 'cursor-wait');
 
       try {
-        const response = await fetch(GAS_URL); // GET запит до Code.gs (doGet)
+        const response = await fetch(GAS_URL);
         const result = await response.json();
         
         if (result.users && result.projects) {
@@ -334,7 +365,7 @@
           globalUserProjects = result.userProjects || {};
         }
       } catch (err) {
-        console.warn('Could not fetch global metadata (CORS or network error).', err);
+        console.warn('Could not fetch global metadata.', err);
       }
       
       $('setup-loading').classList.add('hidden');
@@ -342,12 +373,24 @@
       $('btn-setup-start').classList.remove('opacity-50', 'cursor-wait');
     }
 
+    function toggleClearSetupBtns() {
+      $('clear-user-btn').classList.toggle('hidden', !$('setup-user').value);
+      $('clear-project-btn').classList.toggle('hidden', !$('setup-project').value);
+    }
+    
+    function clearSetupUser() { $('setup-user').value = ''; toggleClearSetupBtns(); $('setup-user').focus(); }
+    function clearSetupProject() { $('setup-project').value = ''; toggleClearSetupBtns(); $('setup-project').focus(); }
+
     function onUserSetupInput() {
       const u = $('setup-user').value.trim();
-      // Якщо юзер знайдений в базі і має останній проект - автоматично підставляємо
       if (globalUserProjects[u]) {
         $('setup-project').value = globalUserProjects[u];
       }
+      toggleClearSetupBtns();
+    }
+    
+    function onProjectSetupInput() {
+      toggleClearSetupBtns();
     }
 
     function saveSetup() {
@@ -363,7 +406,7 @@
       
       localStorage.setItem('last_user', u);
       localStorage.setItem(`project_${u}`, p);
-      localStorage.setItem(`lang_${u}`, state.lang); // save current lang for this user
+      localStorage.setItem(`lang_${u}`, state.lang); 
       
       $('top-user-val').textContent = u;
       $('top-project-val').textContent = p;
@@ -374,12 +417,29 @@
     }
 
     function openSetup() {
-      $('setup-user').value = state.user;
-      $('setup-project').value = state.project;
-      $('setup-overlay').classList.remove('hidden');
+      $('setup-user').value = '';
+      $('setup-project').value = '';
+      toggleClearSetupBtns();
       
-      // На випадок якщо ми відкриваємо вікно знову, можна оновити дані
+      if (state.user) {
+        $('btn-setup-cancel').classList.remove('hidden');
+      } else {
+        $('btn-setup-cancel').classList.add('hidden');
+      }
+      
+      $('setup-overlay').classList.remove('hidden');
       fetchGlobalData();
+    }
+    
+    function closeSetup() {
+      $('setup-overlay').classList.add('hidden');
+    }
+    
+    function clearAllData() {
+      if (confirm(i18n[state.lang].confirmClear)) {
+        localStorage.clear();
+        location.reload();
+      }
     }
 
     function setLang(lang) {
@@ -387,11 +447,8 @@
       if (state.user) localStorage.setItem(`lang_${state.user}`, lang);
       else localStorage.setItem('global_lang', lang);
       
-      // Update Main Switcher
       $('lang-ua').className = lang === 'ua' ? 'px-2.5 py-1 text-xs font-bold rounded-md bg-slate-700 text-white' : 'px-2.5 py-1 text-xs font-bold rounded-md text-slate-400';
       $('lang-en').className = lang === 'en' ? 'px-2.5 py-1 text-xs font-bold rounded-md bg-slate-700 text-white' : 'px-2.5 py-1 text-xs font-bold rounded-md text-slate-400';
-      
-      // Update Setup Switcher
       $('setup-lang-ua').className = lang === 'ua' ? 'px-2.5 py-1 text-xs font-bold rounded-md bg-slate-700 text-white' : 'px-2.5 py-1 text-xs font-bold rounded-md text-slate-400';
       $('setup-lang-en').className = lang === 'en' ? 'px-2.5 py-1 text-xs font-bold rounded-md bg-slate-700 text-white' : 'px-2.5 py-1 text-xs font-bold rounded-md text-slate-400';
       
@@ -402,7 +459,6 @@
         el.placeholder = i18n[lang][el.getAttribute('data-i18n-placeholder')];
       });
       
-      // Update dynamic camera button text if running
       if (state.cameraRunning) $('btn-camera-text').textContent = i18n[lang].cameraOff;
       
       updateSubmitState();
@@ -524,13 +580,11 @@
       };
 
       await sendRequest(payload, () => {
-        // Успіх
         state.counter++;
         localStorage.setItem(`counter_${state.user}_${state.project}`, state.counter);
         $('session-counter').textContent = state.counter;
         showToast('success', 'SUCCESS ✅', `${serial} | ${state.item}`);
         
-        // Reset form
         clearSerial();
         if (state.item) selectItem(state.item);
         if (state.px > 0) { state.px = 0; changePixels(0); }
