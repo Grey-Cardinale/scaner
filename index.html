@@ -58,14 +58,18 @@
       <div class="space-y-4">
         <div>
           <label class="block text-xs font-semibold text-slate-400 uppercase tracking-widest mb-1.5" data-i18n="setupUser">Full first name & last name initial</label>
-          <input id="setup-user" type="text" list="users-list" class="input-glow w-full bg-slate-900 border border-slate-600 rounded-xl px-4 py-3.5 text-white" placeholder="ARTEM T.">
+          <input id="setup-user" type="text" list="users-list" oninput="onUserSetupInput()" class="input-glow w-full bg-slate-900 border border-slate-600 rounded-xl px-4 py-3.5 text-white" placeholder="ARTEM T.">
         </div>
         <div>
           <label class="block text-xs font-semibold text-slate-400 uppercase tracking-widest mb-1.5" data-i18n="setupProject">Project Name</label>
           <input id="setup-project" type="text" list="projects-list" class="input-glow w-full bg-slate-900 border border-slate-600 rounded-xl px-4 py-3.5 text-white" placeholder="Batch_45">
         </div>
       </div>
-      <button onclick="saveSetup()" class="w-full py-4 rounded-2xl font-bold text-lg bg-brand-600 hover:bg-brand-500 text-white shadow-lg active:scale-95 transition-transform" data-i18n="setupBtn">START WORKING</button>
+      
+      <!-- Loading indicator for global list fetch -->
+      <div id="setup-loading" class="hidden text-center text-brand-400 text-xs font-semibold animate-pulse" data-i18n="fetchingData">Fetching global users...</div>
+
+      <button id="btn-setup-start" onclick="saveSetup()" class="w-full py-4 rounded-2xl font-bold text-lg bg-brand-600 hover:bg-brand-500 text-white shadow-lg active:scale-95 transition-transform" data-i18n="setupBtn">START WORKING</button>
     </div>
   </div>
 
@@ -214,7 +218,7 @@
     // ─────────────────────────────────────────────
     // НАЛАШТУВАННЯ
     // ─────────────────────────────────────────────
-    const GAS_URL = 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE'; // Замініть на ваш URL Web App!
+      const GAS_URL = 'https://script.google.com/macros/s/AKfycbxuB8e-V3FIIJ5MkQEJneFtiAqJfS4X_FbIu4pEZHXK7J2_EMCP202xbOYa24-1PJ8zCg/exec'; // Замініть на ваш URL Web App!
 
     // ─────────────────────────────────────────────
     // ІНТЕРНАЦІОНАЛІЗАЦІЯ (i18n)
@@ -232,7 +236,7 @@
         submitReady: "Ready to submit!", submitFill: "Fill serial number and select position", submitBtn: "SUBMIT DATA",
         counterText: "Checked by you in this project:", counterSuffix: "pcs.", exportMainBtn: "FINISH SHEET / EXPORT",
         exportTitle: "Export Report", exportPersonal: "Download my personal report", exportProject: "Download shared project report",
-        cancelBtn: "Cancel", loading: "Sending data...", exporting: "Generating Excel file..."
+        cancelBtn: "Cancel", loading: "Sending data...", exporting: "Generating Excel file...", fetchingData: "Fetching global users..."
       },
       ua: {
         setupTitle: "Налаштування сесії", setupDesc: "Введіть ваші дані для початку роботи",
@@ -246,7 +250,7 @@
         submitReady: "Все готово до відправки!", submitFill: "Заповніть серійний номер та виберіть позицію", submitBtn: "ВІДПРАВИТИ ДАНІ",
         counterText: "Перевірено вами в цьому проекті:", counterSuffix: "шт.", exportMainBtn: "ЗАКІНЧИТИ АРКУШ / ЕКСПОРТ",
         exportTitle: "Експорт звіту", exportPersonal: "Завантажити мій особистий звіт", exportProject: "Завантажити спільний звіт по проекту",
-        cancelBtn: "Скасувати", loading: "Відправка даних…", exporting: "Генерація Excel файлу…"
+        cancelBtn: "Скасувати", loading: "Відправка даних…", exporting: "Генерація Excel файлу…", fetchingData: "Завантаження списку..."
       }
     };
 
@@ -265,8 +269,7 @@
       counter: 0
     };
 
-    let knownUsers = JSON.parse(localStorage.getItem('known_users') || '[]');
-    let knownProjects = JSON.parse(localStorage.getItem('known_projects') || '[]');
+    let globalUserProjects = {};
 
     const $ = id => document.getElementById(id);
 
@@ -274,8 +277,6 @@
     // ІНІЦІАЛІЗАЦІЯ
     // ─────────────────────────────────────────────
     window.onload = () => {
-      populateDatalists();
-
       const globalLang = localStorage.getItem('global_lang') || 'en';
       const savedUser = localStorage.getItem('last_user');
       
@@ -296,6 +297,9 @@
       
       setLang(state.lang);
       
+      // Завантажуємо глобальний список з бекенду (Code.gs має повертати JSON на GET запит)
+      fetchGlobalData();
+      
       // Підключення Tailwind кольорів до config
       tailwind.config = {
         theme: {
@@ -308,17 +312,42 @@
       };
     };
 
-    function populateDatalists() {
-      const uList = $('users-list');
-      const pList = $('projects-list');
-      uList.innerHTML = ''; pList.innerHTML = '';
+    async function fetchGlobalData() {
+      if (GAS_URL.includes('YOUR_GOOGLE')) return; // skip if not configured
       
-      knownUsers.sort().forEach(u => {
-        const opt = document.createElement('option'); opt.value = u; uList.appendChild(opt);
-      });
-      knownProjects.sort().forEach(p => {
-        const opt = document.createElement('option'); opt.value = p; pList.appendChild(opt);
-      });
+      $('setup-loading').classList.remove('hidden');
+      $('btn-setup-start').disabled = true;
+      $('btn-setup-start').classList.add('opacity-50', 'cursor-wait');
+
+      try {
+        const response = await fetch(GAS_URL); // GET запит до Code.gs (doGet)
+        const result = await response.json();
+        
+        if (result.users && result.projects) {
+          const uList = $('users-list');
+          const pList = $('projects-list');
+          uList.innerHTML = ''; pList.innerHTML = '';
+          
+          result.users.forEach(u => uList.appendChild(new Option(u)));
+          result.projects.forEach(p => pList.appendChild(new Option(p)));
+          
+          globalUserProjects = result.userProjects || {};
+        }
+      } catch (err) {
+        console.warn('Could not fetch global metadata (CORS or network error).', err);
+      }
+      
+      $('setup-loading').classList.add('hidden');
+      $('btn-setup-start').disabled = false;
+      $('btn-setup-start').classList.remove('opacity-50', 'cursor-wait');
+    }
+
+    function onUserSetupInput() {
+      const u = $('setup-user').value.trim();
+      // Якщо юзер знайдений в базі і має останній проект - автоматично підставляємо
+      if (globalUserProjects[u]) {
+        $('setup-project').value = globalUserProjects[u];
+      }
     }
 
     function saveSetup() {
@@ -326,15 +355,9 @@
       const p = $('setup-project').value.trim();
       if (!u || !p) return alert("Please fill in name and project!");
       
-      // Add to known lists if new
-      if (!knownUsers.includes(u)) { knownUsers.push(u); localStorage.setItem('known_users', JSON.stringify(knownUsers)); }
-      if (!knownProjects.includes(p)) { knownProjects.push(p); localStorage.setItem('known_projects', JSON.stringify(knownProjects)); }
-      populateDatalists();
-      
       state.user = u;
       state.project = p;
       
-      // Restore lang for this user if exists, otherwise keep current selected lang
       state.lang = localStorage.getItem(`lang_${u}`) || state.lang;
       state.counter = parseInt(localStorage.getItem(`counter_${u}_${p}`) || '0');
       
@@ -354,6 +377,9 @@
       $('setup-user').value = state.user;
       $('setup-project').value = state.project;
       $('setup-overlay').classList.remove('hidden');
+      
+      // На випадок якщо ми відкриваємо вікно знову, можна оновити дані
+      fetchGlobalData();
     }
 
     function setLang(lang) {
@@ -569,11 +595,10 @@
         $('loading-overlay').classList.add('hidden');
         showToast('error', 'NETWORK ERROR ❌', "Using 'no-cors' mode might be required, or the script failed.");
         
-        // Fallback for CORS issues if user didn't set up deployment properly
         if (payload.action === 'save' && err.message.includes('Failed to fetch')) {
             try {
                await fetch(GAS_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
-               onSuccess({}); // assume success
+               onSuccess({});
                return;
             } catch(e) {}
         }
