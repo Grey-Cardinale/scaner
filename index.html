@@ -135,12 +135,9 @@
     
     <!-- BLOCK 1: Scanner -->
     <div class="bg-slate-800/70 border border-slate-700/60 rounded-3xl p-5 space-y-4">
-      <div class="mb-3">
-        <div class="flex items-center gap-2 mb-1">
-          <div class="w-1 h-6 bg-brand-500 rounded-full"></div>
-          <h2 class="font-bold text-white text-lg" data-i18n="serialLabel">Serial number</h2>
-        </div>
-        <p class="text-xs text-slate-400 pl-3" data-i18n="serialSub">Scan full code or type last 5 digits</p>
+      <div class="flex items-center gap-2 mb-4">
+        <div class="w-1 h-6 bg-brand-500 rounded-full"></div>
+        <h2 class="font-bold text-white text-lg" data-i18n="serialLabel">Serial number</h2>
       </div>
 
       <button id="btn-camera" onclick="toggleCamera()" class="w-full py-5 rounded-2xl font-bold text-lg transition-all active:scale-95 bg-brand-600 text-white flex items-center justify-center gap-3">
@@ -271,7 +268,7 @@
         adminTargetProject: "Type project name here...", adminTargetUser: "Type username here...", adminTargetAll: "Type 'all' to confirm", adminDelBtn: "DELETE DATA",
         adminConfirmAll: "CRITICAL WARNING: This will delete the ENTIRE database. Are you absolutely sure?", adminConfirmItem: "Are you sure you want to delete", adminAllError: "Type 'all' in the target field to confirm wipe.", adminTargetError: "Please enter the name to delete.", adminDeleting: "Deleting data...",
         topUser: "User:", topProject: "Project:", changeSession: "Change",
-        serialLabel: "Serial number", serialSub: "Scan full code or type last 5 digits", cameraOn: "TURN ON CAMERA", cameraOff: "TURN OFF CAMERA", serialPlaceholder: "Scan or type manually...",
+        serialLabel: "Serial number", serialSub: "Scan full code or type last 5 digits", cameraOn: "TURN ON CAMERA", cameraOff: "TURN OFF CAMERA", serialPlaceholder: "Scan full code or type last 5 digits...",
         itemLabel: "Panel Position (Item)", itemLT: "Left · Top", itemRT: "Right · Top", itemLB: "Left · Bottom", itemRB: "Right · Bottom",
         problemLabel: "Problem / Notes", pixels: "🔴 Pixels", pixelsSub: "Number of broken pixels",
         shader: "🌈 Shader", shaderSub: "Shader problem", shaderBtn: "Shader",
@@ -292,7 +289,7 @@
         adminTargetProject: "Введіть назву проекту...", adminTargetUser: "Введіть ім'я юзера...", adminTargetAll: "Введіть 'all' для підтвердження", adminDelBtn: "ВИДАЛИТИ ДАНІ",
         adminConfirmAll: "КРИТИЧНЕ ПОПЕРЕДЖЕННЯ: Це видалить УСЮ базу даних. Ви абсолютно впевнені?", adminConfirmItem: "Ви впевнені, що хочете видалити", adminAllError: "Введіть слово 'all' у поле для підтвердження.", adminTargetError: "Будь ласка, введіть назву для видалення.", adminDeleting: "Видалення даних...",
         topUser: "Юзер:", topProject: "Проект:", changeSession: "Змінити",
-        serialLabel: "Серійний номер", serialSub: "Відскануйте весь код або введіть 5 останніх цифр", cameraOn: "УВІМКНУТИ КАМЕРУ", cameraOff: "ВИМКНУТИ КАМЕРУ", serialPlaceholder: "Відскануйте або введіть вручну…",
+        serialLabel: "Серійний номер", serialSub: "Відскануйте весь код або введіть 5 останніх цифр", cameraOn: "УВІМКНУТИ КАМЕРУ", cameraOff: "ВИМКНУТИ КАМЕРУ", serialPlaceholder: "Відскануйте або введіть 5 останніх цифр…",
         itemLabel: "Позиція панелі (Item)", itemLT: "Ліво · Верх", itemRT: "Право · Верх", itemLB: "Ліво · Низ", itemRB: "Право · Низ",
         problemLabel: "Опис поломки", pixels: "🔴 Пікселі", pixelsSub: "Кількість битих пікселів",
         shader: "🌈 Шейдер", shaderSub: "Проблема з шейдером", shaderBtn: "Шейдер",
