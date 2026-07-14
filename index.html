@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
@@ -10,7 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
   <style>
     * { -webkit-tap-highlight-color: transparent; }
-    body { font-family: 'Inter', sans-serif; background: #0f172a; min-height: 100dvh; overscroll-behavior: none; }
+    body { font-family: 'Inter', sans-serif; min-height: 100dvh; overscroll-behavior: none; }
     #reader { border-radius: 16px; overflow: hidden; background: #000; }
     #reader video { border-radius: 16px; }
     #reader__scan_region { background: transparent !important; }
@@ -37,44 +37,48 @@
     .toast-in  { animation: slideUp 0.35s cubic-bezier(0.34,1.56,0.64,1) forwards; }
     .toast-out { animation: slideDown 0.3s ease-in forwards; }
   </style>
+  <script>
+    tailwind.config = { darkMode: 'class', theme: { extend: { colors: { brand: { 50: '#eef2ff', 400: '#818cf8', 500: '#6366f1', 600: '#4f46e5', 900: '#312e81' } } } } };
+  </script>
 </head>
-<body class="text-slate-100 select-none relative">
+<body class="bg-slate-100 dark:bg-[#0f172a] text-slate-900 dark:text-slate-100 select-none relative transition-colors duration-300">
 
   <!-- ==================== SETUP OVERLAY ==================== -->
-  <div id="setup-overlay" class="fixed inset-0 z-50 bg-slate-900 flex flex-col items-center justify-center px-4 overflow-y-auto pt-10 pb-10">
-    <div class="absolute top-4 right-4 flex gap-1 bg-slate-800 rounded-lg p-1">
-      <button onclick="setLang('ua')" id="setup-lang-ua" class="px-2.5 py-1 text-xs font-bold rounded-md text-slate-400">UA</button>
-      <button onclick="setLang('en')" id="setup-lang-en" class="px-2.5 py-1 text-xs font-bold rounded-md bg-slate-700 text-white">EN</button>
+  <div id="setup-overlay" class="fixed inset-0 z-50 bg-slate-100 dark:bg-slate-900 flex flex-col items-center justify-center px-4 overflow-y-auto pt-10 pb-10 transition-colors duration-300">
+    <div class="absolute top-4 right-4 flex gap-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-1 transition-colors duration-300">
+      <button onclick="setLang('ua')" id="setup-lang-ua" class="px-2.5 py-1 text-xs font-bold rounded-md text-slate-500 dark:text-slate-400">UA</button>
+      <button onclick="setLang('en')" id="setup-lang-en" class="px-2.5 py-1 text-xs font-bold rounded-md bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-white transition-colors duration-300">EN</button>
+      <button onclick="setLang('de')" id="setup-lang-de" class="px-2.5 py-1 text-xs font-bold rounded-md text-slate-500 dark:text-slate-400">DE</button>
     </div>
 
-    <div class="w-full max-w-md bg-slate-800 border border-slate-700 rounded-3xl p-6 shadow-2xl space-y-5 my-auto">
+    <div class="w-full max-w-md bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-3xl p-6 shadow-2xl space-y-5 my-auto transition-colors duration-300">
       <div class="text-center">
-        <h2 class="text-2xl font-black text-white" data-i18n="setupTitle">Session Setup</h2>
-        <p class="text-slate-400 text-sm mt-1" data-i18n="setupDesc">Enter your details to start</p>
+        <h2 class="text-2xl font-black text-slate-900 dark:text-white transition-colors duration-300" data-i18n="setupTitle">Session Setup</h2>
+        <p class="text-slate-500 dark:text-slate-400 text-sm mt-1 transition-colors duration-300" data-i18n="setupDesc">Enter your details to start</p>
       </div>
       
       <div class="space-y-4">
         <div>
-          <label class="block text-xs font-semibold text-slate-400 uppercase tracking-widest mb-1.5">
+          <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 transition-colors duration-300">
             <span data-i18n="setupUser">Full first name & last name initial</span>
-            <span class="block text-[10px] font-normal text-slate-500 mt-0.5 normal-case" data-i18n="setupListHint">Start typing or click arrow to see saved options</span>
+            <span class="block text-[10px] font-normal text-slate-500 dark:text-slate-500 mt-0.5 normal-case" data-i18n="setupListHint">Start typing or click arrow to see saved options</span>
           </label>
           <div class="relative">
-            <input id="setup-user" type="text" list="users-list" oninput="onUserSetupInput()" class="input-glow w-full bg-slate-900 border border-slate-600 rounded-xl px-4 py-3.5 text-white pr-12" placeholder="ARTEM T.">
-            <button type="button" onclick="clearSetupUser()" class="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-slate-500 hover:text-white hidden" id="clear-user-btn">
+            <input id="setup-user" type="text" list="users-list" oninput="onUserSetupInput()" class="input-glow w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl px-4 py-3.5 text-slate-900 dark:text-white pr-12 transition-colors duration-300" placeholder="ARTEM T.">
+            <button type="button" onclick="clearSetupUser()" class="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white hidden transition-colors duration-300" id="clear-user-btn">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
           </div>
         </div>
         
         <div>
-          <label class="block text-xs font-semibold text-slate-400 uppercase tracking-widest mb-1.5">
+          <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 transition-colors duration-300">
             <span data-i18n="setupProject">Project Name</span>
-            <span class="block text-[10px] font-normal text-slate-500 mt-0.5 normal-case" data-i18n="setupListHint">Start typing or click arrow to see saved options</span>
+            <span class="block text-[10px] font-normal text-slate-500 dark:text-slate-500 mt-0.5 normal-case" data-i18n="setupListHint">Start typing or click arrow to see saved options</span>
           </label>
           <div class="relative">
-            <input id="setup-project" type="text" list="projects-list" oninput="onProjectSetupInput()" class="input-glow w-full bg-slate-900 border border-slate-600 rounded-xl px-4 py-3.5 text-white pr-12" placeholder="Batch_45">
-            <button type="button" onclick="clearSetupProject()" class="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-slate-500 hover:text-white hidden" id="clear-project-btn">
+            <input id="setup-project" type="text" list="projects-list" oninput="onProjectSetupInput()" class="input-glow w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl px-4 py-3.5 text-slate-900 dark:text-white pr-12 transition-colors duration-300" placeholder="Batch_45">
+            <button type="button" onclick="clearSetupProject()" class="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white hidden transition-colors duration-300" id="clear-project-btn">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
           </div>
@@ -82,30 +86,30 @@
       </div>
 
       <div id="admin-panel" class="hidden border-t border-red-500/30 pt-5 mt-2 space-y-4">
-        <p class="text-red-400 font-bold text-center text-sm tracking-widest" data-i18n="adminMode">ADMIN MODE</p>
-        <select id="admin-delete-type" onchange="onAdminTypeChange()" class="w-full bg-red-950/40 border border-red-900/50 rounded-xl px-4 py-3 text-red-200 font-semibold focus:outline-none focus:border-red-500">
+        <p class="text-red-600 dark:text-red-400 font-bold text-center text-sm tracking-widest transition-colors duration-300" data-i18n="adminMode">ADMIN MODE</p>
+        <select id="admin-delete-type" onchange="onAdminTypeChange()" class="w-full bg-red-50 dark:bg-red-950/40 border border-red-300 dark:border-red-900/50 rounded-xl px-4 py-3 text-red-700 dark:text-red-200 font-semibold focus:outline-none focus:border-red-500 transition-colors duration-300">
           <option value="project" data-i18n="adminDelProject">Delete specific Project</option>
           <option value="user" data-i18n="adminDelUser">Delete specific User</option>
           <option value="all" data-i18n="adminDelAll">WIPE ENTIRE DATABASE</option>
         </select>
         <div class="relative">
-          <input id="admin-target" type="text" list="projects-list" class="w-full bg-red-950/40 border border-red-900/50 rounded-xl px-4 py-3 text-red-100 placeholder-red-900/50" data-i18n-placeholder="adminTargetProject" placeholder="Type project name here...">
+          <input id="admin-target" type="text" list="projects-list" class="w-full bg-red-50 dark:bg-red-950/40 border border-red-300 dark:border-red-900/50 rounded-xl px-4 py-3 text-red-900 dark:text-red-100 placeholder-red-400 dark:placeholder-red-900/50 transition-colors duration-300" data-i18n-placeholder="adminTargetProject" placeholder="Type project name here...">
         </div>
         <button onclick="adminDelete()" class="w-full py-4 rounded-xl font-bold text-lg bg-red-600 hover:bg-red-500 text-white shadow-[0_0_15px_rgba(220,38,38,0.5)] active:scale-95 transition-transform" data-i18n="adminDelBtn">
           DELETE DATA
         </button>
       </div>
       
-      <div id="setup-loading" class="hidden text-center text-brand-400 text-xs font-semibold animate-pulse" data-i18n="fetchingData">Fetching global users...</div>
+      <div id="setup-loading" class="hidden text-center text-brand-500 dark:text-brand-400 text-xs font-semibold animate-pulse transition-colors duration-300" data-i18n="fetchingData">Fetching global users...</div>
 
       <div class="flex gap-3 mt-2">
-        <button id="btn-setup-cancel" onclick="closeSetup()" class="hidden py-4 px-5 rounded-2xl font-bold text-lg bg-slate-700 hover:bg-slate-600 text-white shadow-lg active:scale-95 transition-transform">
+        <button id="btn-setup-cancel" onclick="closeSetup()" class="hidden py-4 px-5 rounded-2xl font-bold text-lg bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-white shadow-lg active:scale-95 transition-all duration-300">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
         </button>
         <button id="btn-setup-start" onclick="saveSetup()" class="flex-1 py-4 rounded-2xl font-bold text-lg bg-brand-600 hover:bg-brand-500 text-white shadow-lg active:scale-95 transition-transform" data-i18n="setupBtn">START WORKING</button>
       </div>
 
-      <button onclick="clearAllData()" class="text-xs font-semibold text-slate-500 hover:text-red-400 mt-6 pt-4 border-t border-slate-700/50 block w-full text-center transition-colors" data-i18n="clearDataBtn">
+      <button onclick="clearAllData()" class="text-xs font-semibold text-slate-500 dark:text-slate-500 hover:text-red-600 dark:hover:text-red-400 mt-6 pt-4 border-t border-slate-200 dark:border-slate-700/50 block w-full text-center transition-colors" data-i18n="clearDataBtn">
         Clear browser cache
       </button>
     </div>
@@ -115,29 +119,44 @@
   <datalist id="projects-list"></datalist>
 
   <!-- ==================== TOP BAR ==================== -->
-  <div class="sticky top-0 z-30 bg-slate-900/80 backdrop-blur-md border-b border-slate-800 px-4 py-3 flex items-center justify-between">
+  <div class="sticky top-0 z-30 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-4 py-3 flex items-center justify-between transition-colors duration-300">
     <div class="flex items-center gap-3">
-      <div class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_#34d399]"></div>
+      <div id="status-indicator" class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_#34d399]"></div>
       <div class="text-xs">
-        <p class="text-slate-400 font-medium"><span data-i18n="topUser">User:</span> <strong id="top-user-val" class="text-white"></strong></p>
-        <p class="text-slate-400 font-medium"><span data-i18n="topProject">Project:</span> <strong id="top-project-val" class="text-white"></strong></p>
+        <p class="text-slate-600 dark:text-slate-400 font-medium transition-colors duration-300"><span data-i18n="topUser">User:</span> <strong id="top-user-val" class="text-slate-900 dark:text-white"></strong></p>
+        <p class="text-slate-600 dark:text-slate-400 font-medium transition-colors duration-300"><span data-i18n="topProject">Project:</span> <strong id="top-project-val" class="text-slate-900 dark:text-white"></strong></p>
       </div>
-      <button onclick="openSetup()" class="text-[10px] uppercase font-bold text-brand-400 bg-brand-900/30 px-2 py-1 rounded-md active:bg-brand-900/60" data-i18n="changeSession">Change</button>
+      <button onclick="openSetup()" class="text-[10px] uppercase font-bold text-brand-600 dark:text-brand-400 bg-brand-100 dark:bg-brand-900/30 px-2 py-1 rounded-md active:bg-brand-200 dark:active:bg-brand-900/60 transition-colors duration-300" data-i18n="changeSession">Change</button>
     </div>
-    <div class="flex gap-1 bg-slate-800 rounded-lg p-1">
-      <button onclick="setLang('ua')" id="lang-ua" class="px-2.5 py-1 text-xs font-bold rounded-md text-slate-400">UA</button>
-      <button onclick="setLang('en')" id="lang-en" class="px-2.5 py-1 text-xs font-bold rounded-md bg-slate-700 text-white">EN</button>
+    
+    <div class="flex items-center gap-2">
+      <button onclick="toggleTheme()" class="p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 transition-colors">
+        <svg id="theme-icon-dark" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+        <svg id="theme-icon-light" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+      </button>
+
+      <div class="flex gap-1 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-1 transition-colors duration-300">
+        <button onclick="setLang('ua')" id="lang-ua" class="px-2.5 py-1 text-xs font-bold rounded-md text-slate-500 dark:text-slate-400">UA</button>
+        <button onclick="setLang('en')" id="lang-en" class="px-2.5 py-1 text-xs font-bold rounded-md bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm dark:shadow-none transition-colors duration-300">EN</button>
+        <button onclick="setLang('de')" id="lang-de" class="px-2.5 py-1 text-xs font-bold rounded-md text-slate-500 dark:text-slate-400">DE</button>
+      </div>
     </div>
+  </div>
+
+  <!-- OFFLINE BADGE -->
+  <div id="offline-badge" class="hidden bg-orange-500 text-white text-xs font-bold text-center py-1.5 flex justify-center items-center gap-2 transition-colors duration-300">
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+    <span data-i18n="offlineMode">OFFLINE MODE - Scans will be saved locally</span>
   </div>
 
   <!-- ==================== MAIN APP ==================== -->
   <div id="app" class="max-w-2xl mx-auto px-4 py-6 pb-24 space-y-5">
     
     <!-- BLOCK 1: Scanner -->
-    <div class="bg-slate-800/70 border border-slate-700/60 rounded-3xl p-5 space-y-4">
+    <div class="bg-white dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700/60 rounded-3xl p-5 space-y-4 shadow-sm dark:shadow-none transition-colors duration-300">
       <div class="flex items-center gap-2 mb-4">
         <div class="w-1 h-6 bg-brand-500 rounded-full"></div>
-        <h2 class="font-bold text-white text-lg" data-i18n="serialLabel">Serial number</h2>
+        <h2 class="font-bold text-slate-900 dark:text-white text-lg transition-colors duration-300" data-i18n="serialLabel">Serial number</h2>
       </div>
 
       <button id="btn-camera" onclick="toggleCamera()" class="w-full py-5 rounded-2xl font-bold text-lg transition-all active:scale-95 bg-brand-600 text-white flex items-center justify-center gap-3">
@@ -146,117 +165,117 @@
       </button>
 
       <div id="scanner-wrapper" class="hidden relative">
-        <div class="relative rounded-2xl overflow-hidden bg-black" style="min-height:220px;">
+        <div class="relative rounded-2xl overflow-hidden bg-slate-200 dark:bg-black transition-colors duration-300" style="min-height:220px;">
           <div id="reader" class="w-full"></div>
           <div class="scan-frame"><div class="scan-line"></div><div class="scan-frame-bl"></div><div class="scan-frame-br"></div></div>
         </div>
       </div>
 
       <div class="relative">
-        <input id="serial-input" type="text" data-i18n-placeholder="serialPlaceholder" placeholder="Scan or type manually..." oninput="onSerialInput()" class="input-glow w-full bg-slate-900 border border-slate-600 rounded-xl px-4 py-4 text-white text-base font-mono pr-12 transition-colors" autocomplete="off" />
-        <button id="btn-clear-serial" onclick="clearSerial()" class="hidden absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-slate-400 hover:text-white"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+        <input id="serial-input" type="text" data-i18n-placeholder="serialPlaceholder" placeholder="Scan full code or type last 5 digits..." oninput="onSerialInput()" class="input-glow w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl px-4 py-4 text-slate-900 dark:text-white text-base font-mono pr-12 transition-colors duration-300" autocomplete="off" />
+        <button id="btn-clear-serial" onclick="clearSerial()" class="hidden absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors duration-300"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
       </div>
 
       <!-- Duplicate Warning Block -->
-      <div id="duplicate-warning" class="hidden mt-3 bg-orange-950/40 border border-orange-500/50 rounded-xl p-4">
-        <p class="text-orange-400 font-bold text-sm mb-1" data-i18n="dupWarning">⚠️ This panel is already in the project!</p>
-        <p id="dup-info" class="text-orange-200 text-xs mb-4"></p>
-        <button onclick="deleteDuplicate()" class="w-full py-3 rounded-lg border border-orange-600 text-orange-400 hover:bg-orange-600/20 font-bold text-sm active:scale-95 transition-colors" data-i18n="dupDelBtn">DELETE SERIAL FROM PROJECT</button>
+      <div id="duplicate-warning" class="hidden mt-3 bg-orange-50 dark:bg-orange-950/40 border border-orange-300 dark:border-orange-500/50 rounded-xl p-4 transition-colors duration-300">
+        <p class="text-orange-600 dark:text-orange-400 font-bold text-sm mb-1 transition-colors duration-300" data-i18n="dupWarning">⚠️ This panel is already in the project!</p>
+        <p id="dup-info" class="text-orange-700 dark:text-orange-200 text-xs mb-4 transition-colors duration-300"></p>
+        <button onclick="deleteDuplicate()" class="w-full py-3 rounded-lg border border-orange-600 text-orange-600 dark:text-orange-400 hover:bg-orange-100 dark:hover:bg-orange-600/20 font-bold text-sm active:scale-95 transition-colors" data-i18n="dupDelBtn">DELETE SERIAL FROM PROJECT</button>
       </div>
     </div>
 
     <!-- BLOCK 2: Item Position -->
-    <div class="bg-slate-800/70 border border-slate-700/60 rounded-3xl p-5">
+    <div class="bg-white dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700/60 rounded-3xl p-5 shadow-sm dark:shadow-none transition-colors duration-300">
       <div class="flex items-center gap-2 mb-4">
         <div class="w-1 h-6 bg-violet-500 rounded-full"></div>
-        <h2 class="font-bold text-white text-lg" data-i18n="itemLabel">Panel Position (Item)</h2>
+        <h2 class="font-bold text-slate-900 dark:text-white text-lg transition-colors duration-300" data-i18n="itemLabel">Panel Position (Item)</h2>
       </div>
       <div class="grid grid-cols-2 gap-3 mb-2">
-        <button onclick="selectItem('LT')" id="item-LT" class="item-btn bg-slate-900 border-2 border-slate-600 rounded-2xl p-5 active:scale-95"><div class="text-2xl font-black text-white">LT</div><div class="text-xs text-slate-400 mt-1 font-medium" data-i18n="itemLT">Left · Top</div></button>
-        <button onclick="selectItem('RT')" id="item-RT" class="item-btn bg-slate-900 border-2 border-slate-600 rounded-2xl p-5 active:scale-95"><div class="text-2xl font-black text-white">RT</div><div class="text-xs text-slate-400 mt-1 font-medium" data-i18n="itemRT">Right · Top</div></button>
-        <button onclick="selectItem('LB')" id="item-LB" class="item-btn bg-slate-900 border-2 border-slate-600 rounded-2xl p-5 active:scale-95"><div class="text-2xl font-black text-white">LB</div><div class="text-xs text-slate-400 mt-1 font-medium" data-i18n="itemLB">Left · Bottom</div></button>
-        <button onclick="selectItem('RB')" id="item-RB" class="item-btn bg-slate-900 border-2 border-slate-600 rounded-2xl p-5 active:scale-95"><div class="text-2xl font-black text-white">RB</div><div class="text-xs text-slate-400 mt-1 font-medium" data-i18n="itemRB">Right · Bottom</div></button>
+        <button onclick="selectItem('LT')" id="item-LT" class="item-btn bg-slate-50 dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-600 rounded-2xl p-5 active:scale-95 transition-colors duration-300"><div class="text-2xl font-black text-slate-900 dark:text-white">LT</div><div class="text-xs text-slate-500 dark:text-slate-400 mt-1 font-medium" data-i18n="itemLT">Left · Top</div></button>
+        <button onclick="selectItem('RT')" id="item-RT" class="item-btn bg-slate-50 dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-600 rounded-2xl p-5 active:scale-95 transition-colors duration-300"><div class="text-2xl font-black text-slate-900 dark:text-white">RT</div><div class="text-xs text-slate-500 dark:text-slate-400 mt-1 font-medium" data-i18n="itemRT">Right · Top</div></button>
+        <button onclick="selectItem('LB')" id="item-LB" class="item-btn bg-slate-50 dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-600 rounded-2xl p-5 active:scale-95 transition-colors duration-300"><div class="text-2xl font-black text-slate-900 dark:text-white">LB</div><div class="text-xs text-slate-500 dark:text-slate-400 mt-1 font-medium" data-i18n="itemLB">Left · Bottom</div></button>
+        <button onclick="selectItem('RB')" id="item-RB" class="item-btn bg-slate-50 dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-600 rounded-2xl p-5 active:scale-95 transition-colors duration-300"><div class="text-2xl font-black text-slate-900 dark:text-white">RB</div><div class="text-xs text-slate-500 dark:text-slate-400 mt-1 font-medium" data-i18n="itemRB">Right · Bottom</div></button>
       </div>
     </div>
 
     <!-- BLOCK 3: Problem / Notes -->
-    <div class="bg-slate-800/70 border border-slate-700/60 rounded-3xl p-5 space-y-5">
+    <div class="bg-white dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700/60 rounded-3xl p-5 space-y-5 shadow-sm dark:shadow-none transition-colors duration-300">
       <div class="flex items-center gap-2 mb-1">
         <div class="w-1 h-6 bg-amber-500 rounded-full"></div>
-        <h2 class="font-bold text-white text-lg" data-i18n="problemLabel">Problem / Notes</h2>
+        <h2 class="font-bold text-slate-900 dark:text-white text-lg transition-colors duration-300" data-i18n="problemLabel">Problem / Notes</h2>
       </div>
-      <div class="bg-slate-900/60 border border-slate-700/40 rounded-2xl p-4">
+      <div class="bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700/40 rounded-2xl p-4 transition-colors duration-300">
         <div class="flex items-center justify-between mb-3">
-          <div><p class="font-semibold text-white" data-i18n="pixels">🔴 Pixels</p><p class="text-xs text-slate-400 mt-0.5" data-i18n="pixelsSub">Number of broken pixels</p></div>
+          <div><p class="font-semibold text-slate-900 dark:text-white transition-colors duration-300" data-i18n="pixels">🔴 Pixels</p><p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5" data-i18n="pixelsSub">Number of broken pixels</p></div>
         </div>
         <div class="flex items-center justify-center gap-6">
-          <button onclick="changePixels(-1)" class="w-16 h-16 rounded-2xl bg-slate-800 border border-slate-600 text-white text-3xl font-bold active:scale-95 transition-transform">−</button>
-          <div class="text-center min-w-[70px]"><div id="px-count" class="text-5xl font-black text-white tabular-nums">0</div></div>
-          <button onclick="changePixels(1)" class="w-16 h-16 rounded-2xl bg-slate-800 border border-slate-600 text-white text-3xl font-bold active:scale-95 transition-transform">+</button>
+          <button onclick="changePixels(-1)" class="w-16 h-16 rounded-2xl bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white text-3xl font-bold active:scale-95 transition-all duration-300">−</button>
+          <div class="text-center min-w-[70px]"><div id="px-count" class="text-5xl font-black text-slate-900 dark:text-white tabular-nums transition-colors duration-300">0</div></div>
+          <button onclick="changePixels(1)" class="w-16 h-16 rounded-2xl bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white text-3xl font-bold active:scale-95 transition-all duration-300">+</button>
         </div>
       </div>
-      <div class="bg-slate-900/60 border border-slate-700/40 rounded-2xl p-4 flex items-center justify-between">
-        <div><p class="font-semibold text-white" data-i18n="shader">🌈 Shader</p><p class="text-xs text-slate-400 mt-0.5" data-i18n="shaderSub">Shader problem</p></div>
-        <button id="toggle-shader" onclick="toggleShader()" class="toggle-btn bg-slate-800 border-2 border-slate-600 rounded-2xl px-8 py-4 font-bold text-lg text-slate-400 active:scale-95" data-i18n="shaderBtn">Shader</button>
+      <div class="bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700/40 rounded-2xl p-4 flex items-center justify-between transition-colors duration-300">
+        <div><p class="font-semibold text-slate-900 dark:text-white transition-colors duration-300" data-i18n="shader">🌈 Shader</p><p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5" data-i18n="shaderSub">Shader problem</p></div>
+        <button id="toggle-shader" onclick="toggleShader()" class="toggle-btn bg-white dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 rounded-2xl px-8 py-4 font-bold text-lg text-slate-600 dark:text-slate-400 active:scale-95 transition-all duration-300" data-i18n="shaderBtn">Shader</button>
       </div>
       <div>
-        <label class="block text-xs font-semibold text-slate-400 mb-2" data-i18n="notesLabel">📝 Additional notes (optional)</label>
-        <textarea id="notes-input" data-i18n-placeholder="notesPlaceholder" placeholder="Enter extra description..." rows="2" class="input-glow w-full bg-slate-900 border border-slate-600 rounded-xl px-4 py-3 text-white text-base resize-none"></textarea>
+        <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2 transition-colors duration-300" data-i18n="notesLabel">📝 Additional notes (optional)</label>
+        <textarea id="notes-input" data-i18n-placeholder="notesPlaceholder" placeholder="Enter extra description..." rows="2" class="input-glow w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl px-4 py-3 text-slate-900 dark:text-white text-base resize-none transition-colors duration-300"></textarea>
       </div>
     </div>
 
     <!-- BLOCK 4: Submit & Counter -->
     <div class="space-y-4">
-      <div id="submit-hint" class="text-center text-slate-500 text-sm py-1" data-i18n="submitFill">Fill serial number and select position</div>
-      <button id="btn-submit" onclick="submitData()" disabled class="w-full py-6 rounded-3xl font-black text-xl tracking-wide transition-all bg-slate-700 text-slate-500 cursor-not-allowed flex items-center justify-center gap-3">
+      <div id="submit-hint" class="text-center text-slate-500 dark:text-slate-500 text-sm py-1 transition-colors duration-300" data-i18n="submitFill">Fill serial number and select position</div>
+      <button id="btn-submit" onclick="submitData()" disabled class="w-full py-6 rounded-3xl font-black text-xl tracking-wide transition-all bg-slate-200 dark:bg-slate-700 text-slate-400 dark:text-slate-500 cursor-not-allowed flex items-center justify-center gap-3">
         <span id="submit-text" data-i18n="submitBtn">SUBMIT DATA</span>
       </button>
-      <div class="text-center text-sm font-semibold text-brand-300 bg-brand-900/20 py-2 rounded-xl border border-brand-900/50">
-        <span data-i18n="counterText">Checked by you in this project:</span> <span id="session-counter" class="text-white text-lg">0</span> <span data-i18n="counterSuffix">pcs.</span>
+      <div class="text-center text-sm font-semibold text-brand-700 dark:text-brand-300 bg-brand-50 dark:bg-brand-900/20 py-2 rounded-xl border border-brand-200 dark:border-brand-900/50 transition-colors duration-300">
+        <span data-i18n="counterText">Checked by you in this project:</span> <span id="session-counter" class="text-slate-900 dark:text-white text-lg transition-colors duration-300">0</span> <span data-i18n="counterSuffix">pcs.</span>
       </div>
       
       <!-- UNDO BUTTON -->
-      <button id="btn-undo" onclick="undoLast()" class="hidden w-full py-3 rounded-xl border border-rose-500/50 text-rose-400 font-bold hover:bg-rose-950/40 active:scale-95 transition-all">
+      <button id="btn-undo" onclick="undoLast()" class="hidden w-full py-3 rounded-xl border border-rose-300 dark:border-rose-500/50 text-rose-600 dark:text-rose-400 font-bold hover:bg-rose-50 dark:hover:bg-rose-950/40 active:scale-95 transition-all duration-300">
         <span id="undo-text"></span>
       </button>
       
-      <button onclick="openExportModal()" class="w-full py-4 rounded-xl border-2 border-slate-600 text-slate-300 font-bold hover:bg-slate-800 active:scale-95 transition-all mt-4" data-i18n="exportMainBtn">
+      <button onclick="openExportModal()" class="w-full py-4 rounded-xl border-2 border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 font-bold hover:bg-slate-50 dark:hover:bg-slate-800 active:scale-95 transition-all mt-4 duration-300" data-i18n="exportMainBtn">
         FINISH SHEET / EXPORT
       </button>
     </div>
   </div>
 
   <!-- ==================== EXPORT MODAL ==================== -->
-  <div id="export-modal" class="hidden fixed inset-0 z-50 bg-black/70 flex items-center justify-center px-4 backdrop-blur-sm">
-    <div class="w-full max-w-md bg-slate-800 border border-slate-700 rounded-3xl p-6 shadow-2xl space-y-4 text-center">
-      <h2 class="text-xl font-black text-white" data-i18n="exportTitle">Export Report</h2>
-      <button onclick="doExport('personal')" class="w-full py-4 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-bold active:scale-95" data-i18n="exportPersonal">Download my personal report</button>
-      <button onclick="doExport('project')" class="w-full py-4 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-bold active:scale-95" data-i18n="exportProject">Download shared project report</button>
-      <button onclick="closeExportModal()" class="w-full py-3 rounded-xl border border-slate-600 text-slate-400 hover:text-white font-semibold mt-2" data-i18n="cancelBtn">Cancel</button>
+  <div id="export-modal" class="hidden fixed inset-0 z-50 bg-slate-900/70 dark:bg-black/70 flex items-center justify-center px-4 backdrop-blur-sm transition-colors duration-300">
+    <div class="w-full max-w-md bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-3xl p-6 shadow-2xl space-y-4 text-center transition-colors duration-300">
+      <h2 class="text-xl font-black text-slate-900 dark:text-white transition-colors duration-300" data-i18n="exportTitle">Export Report</h2>
+      <button onclick="doExport('personal')" class="w-full py-4 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-bold active:scale-95 transition-transform" data-i18n="exportPersonal">Download my personal report</button>
+      <button onclick="doExport('project')" class="w-full py-4 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-bold active:scale-95 transition-transform" data-i18n="exportProject">Download shared project report</button>
+      <button onclick="closeExportModal()" class="w-full py-3 rounded-xl border border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-semibold mt-2 transition-colors duration-300" data-i18n="cancelBtn">Cancel</button>
     </div>
   </div>
 
   <!-- ==================== LOADING OVERLAY ==================== -->
-  <div id="loading-overlay" class="hidden fixed inset-0 z-50 bg-black/70 flex items-center justify-center backdrop-blur-sm">
-    <div class="bg-slate-800 border border-slate-600 rounded-3xl p-8 text-center shadow-2xl max-w-xs w-full mx-4">
-      <div class="w-16 h-16 mx-auto mb-4 border-4 border-slate-700 border-t-brand-500 rounded-full animate-spin"></div>
-      <p id="loading-text" class="font-black text-white text-lg" data-i18n="loading">Sending data...</p>
+  <div id="loading-overlay" class="hidden fixed inset-0 z-50 bg-slate-900/70 dark:bg-black/70 flex items-center justify-center backdrop-blur-sm transition-colors duration-300">
+    <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-3xl p-8 text-center shadow-2xl max-w-xs w-full mx-4 transition-colors duration-300">
+      <div class="w-16 h-16 mx-auto mb-4 border-4 border-slate-200 dark:border-slate-700 border-t-brand-500 rounded-full animate-spin transition-colors duration-300"></div>
+      <p id="loading-text" class="font-black text-slate-900 dark:text-white text-lg transition-colors duration-300" data-i18n="loading">Sending data...</p>
     </div>
   </div>
 
   <!-- ==================== TOAST ==================== -->
   <div id="toast-container" class="fixed bottom-6 left-4 right-4 z-50 pointer-events-none max-w-lg mx-auto">
-    <div id="toast" class="hidden rounded-3xl px-6 py-5 shadow-2xl border pointer-events-auto">
+    <div id="toast" class="hidden rounded-3xl px-6 py-5 shadow-2xl border pointer-events-auto transition-colors duration-300">
       <div class="flex items-start gap-4">
-        <div id="toast-icon" class="w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0 mt-0.5"></div>
-        <div class="flex-1"><p id="toast-title" class="font-black text-lg"></p><p id="toast-body" class="text-sm mt-0.5 opacity-80"></p></div>
+        <div id="toast-icon" class="w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0 mt-0.5 transition-colors duration-300"></div>
+        <div class="flex-1"><p id="toast-title" class="font-black text-lg transition-colors duration-300"></p><p id="toast-body" class="text-sm mt-0.5 opacity-80 transition-colors duration-300"></p></div>
       </div>
     </div>
   </div>
 
   <!-- ==================== JS LOGIC ==================== -->
   <script>
-      const GAS_URL = 'https://script.google.com/macros/s/AKfycbxuB8e-V3FIIJ5MkQEJneFtiAqJfS4X_FbIu4pEZHXK7J2_EMCP202xbOYa24-1PJ8zCg/exec'; 
+    const GAS_URL = 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE'; 
 
     const i18n = {
       en: {
@@ -268,7 +287,7 @@
         adminTargetProject: "Type project name here...", adminTargetUser: "Type username here...", adminTargetAll: "Type 'all' to confirm", adminDelBtn: "DELETE DATA",
         adminConfirmAll: "CRITICAL WARNING: This will delete the ENTIRE database. Are you absolutely sure?", adminConfirmItem: "Are you sure you want to delete", adminAllError: "Type 'all' in the target field to confirm wipe.", adminTargetError: "Please enter the name to delete.", adminDeleting: "Deleting data...",
         topUser: "User:", topProject: "Project:", changeSession: "Change",
-        serialLabel: "Serial number", serialSub: "Scan full code or type last 5 digits", cameraOn: "TURN ON CAMERA", cameraOff: "TURN OFF CAMERA", serialPlaceholder: "Scan full code or type last 5 digits...",
+        serialLabel: "Serial number", serialSub: "Scan full code or type last 5 digits", cameraOn: "TURN ON CAMERA", cameraOff: "TURN OFF CAMERA", serialPlaceholder: "Scan or type last 5 digits...",
         itemLabel: "Panel Position (Item)", itemLT: "Left · Top", itemRT: "Right · Top", itemLB: "Left · Bottom", itemRB: "Right · Bottom",
         problemLabel: "Problem / Notes", pixels: "🔴 Pixels", pixelsSub: "Number of broken pixels",
         shader: "🌈 Shader", shaderSub: "Shader problem", shaderBtn: "Shader",
@@ -278,7 +297,8 @@
         exportTitle: "Export Report", exportPersonal: "Download my personal report", exportProject: "Download shared project report",
         cancelBtn: "Cancel", loading: "Sending data...", exporting: "Generating Excel file...", fetchingData: "Fetching global users...",
         dupWarning: "⚠️ This panel is already in the project!", dupAddedBy: "Added by:", dupPos: "Pos:", dupDelBtn: "DELETE SERIAL FROM PROJECT", dupOverwriteBtn: "OVERWRITE DATA",
-        undoBtn: "↩️ Undo last scan (Serial: ", undoConfirm: "Are you sure you want to completely delete serial ", undoSuccess: "Undo successful!"
+        undoBtn: "↩️ Undo last scan (Serial: ", undoConfirm: "Are you sure you want to completely delete serial ", undoSuccess: "Undo successful!",
+        offlineMode: "OFFLINE MODE - Scans will be saved locally", syncing: "Syncing offline data...", syncSuccess: "All offline data synced!"
       },
       ua: {
         setupTitle: "Налаштування сесії", setupDesc: "Введіть ваші дані для початку роботи",
@@ -289,7 +309,7 @@
         adminTargetProject: "Введіть назву проекту...", adminTargetUser: "Введіть ім'я юзера...", adminTargetAll: "Введіть 'all' для підтвердження", adminDelBtn: "ВИДАЛИТИ ДАНІ",
         adminConfirmAll: "КРИТИЧНЕ ПОПЕРЕДЖЕННЯ: Це видалить УСЮ базу даних. Ви абсолютно впевнені?", adminConfirmItem: "Ви впевнені, що хочете видалити", adminAllError: "Введіть слово 'all' у поле для підтвердження.", adminTargetError: "Будь ласка, введіть назву для видалення.", adminDeleting: "Видалення даних...",
         topUser: "Юзер:", topProject: "Проект:", changeSession: "Змінити",
-        serialLabel: "Серійний номер", serialSub: "Відскануйте весь код або введіть 5 останніх цифр", cameraOn: "УВІМКНУТИ КАМЕРУ", cameraOff: "ВИМКНУТИ КАМЕРУ", serialPlaceholder: "Відскануйте або введіть 5 останніх цифр…",
+        serialLabel: "Серійний номер", serialSub: "Відскануйте весь код або введіть 5 останніх цифр", cameraOn: "УВІМКНУТИ КАМЕРУ", cameraOff: "ВИМКНУТИ КАМЕРУ", serialPlaceholder: "Скануй або введи 5 останніх...",
         itemLabel: "Позиція панелі (Item)", itemLT: "Ліво · Верх", itemRT: "Право · Верх", itemLB: "Ліво · Низ", itemRB: "Право · Низ",
         problemLabel: "Опис поломки", pixels: "🔴 Пікселі", pixelsSub: "Кількість битих пікселів",
         shader: "🌈 Шейдер", shaderSub: "Проблема з шейдером", shaderBtn: "Шейдер",
@@ -299,12 +319,37 @@
         exportTitle: "Експорт звіту", exportPersonal: "Завантажити мій особистий звіт", exportProject: "Завантажити спільний звіт по проекту",
         cancelBtn: "Скасувати", loading: "Відправка даних…", exporting: "Генерація Excel файлу…", fetchingData: "Завантаження списку...",
         dupWarning: "⚠️ Ця панель вже є в поточному проекті!", dupAddedBy: "Додав:", dupPos: "Позиція:", dupDelBtn: "ВИДАЛИТИ ПАНЕЛЬ З ПРОЕКТУ", dupOverwriteBtn: "ПЕРЕЗАПИСАТИ ДАНІ",
-        undoBtn: "↩️ Скасувати (Серійник: ", undoConfirm: "Ви впевнені, що хочете повністю видалити серійний номер ", undoSuccess: "Скасовано успішно!"
+        undoBtn: "↩️ Скасувати (Серійник: ", undoConfirm: "Ви впевнені, що хочете повністю видалити серійний номер ", undoSuccess: "Скасовано успішно!",
+        offlineMode: "ОФЛАЙН РЕЖИМ - Дані зберігаються локально", syncing: "Синхронізація офлайн даних...", syncSuccess: "Всі офлайн дані збережено!"
+      },
+      de: {
+        setupTitle: "Sitzung einrichten", setupDesc: "Geben Sie Ihre Daten ein, um zu beginnen",
+        setupUser: "Vorname & Anfangsbuchstabe Nachname", setupProject: "Projektname", setupBtn: "ARBEIT BEGINNEN",
+        setupListHint: "Tippen Sie oder klicken Sie auf den Pfeil für gespeicherte Optionen", clearDataBtn: "Browser-Cache leeren",
+        confirmClear: "Sind Sie sicher, dass Sie den Browser-Cache leeren möchten?",
+        adminMode: "ADMIN-MODUS", adminDelProject: "Bestimmtes Projekt löschen", adminDelUser: "Bestimmten Benutzer löschen", adminDelAll: "GESAMTE DATENBANK LÖSCHEN",
+        adminTargetProject: "Projektname hier eingeben...", adminTargetUser: "Benutzername hier eingeben...", adminTargetAll: "Tippen Sie 'all' zur Bestätigung", adminDelBtn: "DATEN LÖSCHEN",
+        adminConfirmAll: "KRITISCHE WARNUNG: Dies löscht die GESAMTE Datenbank. Sind Sie absolut sicher?", adminConfirmItem: "Möchten Sie wirklich löschen:", adminAllError: "Geben Sie 'all' in das Zielfeld ein, um das Löschen zu bestätigen.", adminTargetError: "Bitte geben Sie den Namen zum Löschen ein.", adminDeleting: "Daten werden gelöscht...",
+        topUser: "Benutzer:", topProject: "Projekt:", changeSession: "Ändern",
+        serialLabel: "Seriennummer", serialSub: "Vollen Code scannen oder letzte 5 Ziffern eingeben", cameraOn: "KAMERA EINSCHALTEN", cameraOff: "KAMERA AUSSCHALTEN", serialPlaceholder: "Scannen oder 5 Ziffern tippen...",
+        itemLabel: "Panel-Position (Item)", itemLT: "Links · Oben", itemRT: "Rechts · Oben", itemLB: "Links · Unten", itemRB: "Rechts · Unten",
+        problemLabel: "Problem / Notizen", pixels: "🔴 Pixel", pixelsSub: "Anzahl defekter Pixel",
+        shader: "🌈 Shader", shaderSub: "Shader-Problem", shaderBtn: "Shader",
+        notesLabel: "📝 Zusätzliche Notizen (optional)", notesPlaceholder: "Zusätzliche Beschreibung eingeben...",
+        submitReady: "Bereit zum Senden!", submitFill: "Seriennummer ausfüllen & Position wählen", submitBtn: "DATEN SENDEN",
+        counterText: "Von Ihnen in diesem Projekt geprüft:", counterSuffix: "Stk.", exportMainBtn: "BLATT BEENDEN / EXPORT",
+        exportTitle: "Bericht exportieren", exportPersonal: "Meinen persönlichen Bericht herunterladen", exportProject: "Geteilten Projektbericht herunterladen",
+        cancelBtn: "Abbrechen", loading: "Daten senden...", exporting: "Excel-Datei wird generiert...", fetchingData: "Globale Benutzer abrufen...",
+        dupWarning: "⚠️ Dieses Panel ist bereits im Projekt!", dupAddedBy: "Hinzugefügt von:", dupPos: "Pos:", dupDelBtn: "SERIENNUMMER AUS PROJEKT LÖSCHEN", dupOverwriteBtn: "DATEN ÜBERSCHREIBEN",
+        undoBtn: "↩️ Rückgängig (Seriennr: ", undoConfirm: "Möchten Sie Seriennummer vollständig löschen: ", undoSuccess: "Erfolgreich rückgängig gemacht!",
+        offlineMode: "OFFLINE-MODUS - Scans werden lokal gespeichert", syncing: "Offline-Daten synchronisieren...", syncSuccess: "Alle Offline-Daten gespeichert!"
       }
     };
 
     let state = {
       lang: 'en',
+      theme: 'dark',
+      isOnline: navigator.onLine,
       user: '',
       project: '',
       item: null,
@@ -321,6 +366,21 @@
     const $ = id => document.getElementById(id);
 
     window.onload = () => {
+      // Theme Logic
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme) {
+        applyTheme(savedTheme);
+      } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        applyTheme('dark');
+      } else {
+        applyTheme('light');
+      }
+
+      // Offline Logic
+      window.addEventListener('online', handleOnline);
+      window.addEventListener('offline', handleOffline);
+      if (!state.isOnline) handleOffline();
+
       const globalLang = localStorage.getItem('global_lang') || 'en';
       const savedUser = localStorage.getItem('last_user');
       
@@ -334,6 +394,8 @@
         $('top-project-val').textContent = state.project;
         $('session-counter').textContent = state.counter;
         $('setup-overlay').classList.add('hidden');
+        
+        if (state.isOnline) syncOfflineData();
       } else {
         state.lang = globalLang;
         $('setup-overlay').classList.remove('hidden');
@@ -341,10 +403,66 @@
       }
       
       setLang(state.lang);
-      fetchGlobalData();
-      
-      tailwind.config = { theme: { extend: { colors: { brand: { 50: '#eef2ff', 400: '#818cf8', 500: '#6366f1', 600: '#4f46e5', 900: '#312e81' } } } } };
+      if (state.isOnline) fetchGlobalData();
     };
+
+    function applyTheme(theme) {
+      state.theme = theme;
+      localStorage.setItem('theme', theme);
+      if (theme === 'dark') {
+        document.documentElement.classList.add('dark');
+        $('theme-icon-light').classList.remove('hidden');
+        $('theme-icon-dark').classList.add('hidden');
+      } else {
+        document.documentElement.classList.remove('dark');
+        $('theme-icon-dark').classList.remove('hidden');
+        $('theme-icon-light').classList.add('hidden');
+      }
+    }
+
+    function toggleTheme() {
+      applyTheme(state.theme === 'dark' ? 'light' : 'dark');
+    }
+
+    function handleOnline() {
+      state.isOnline = true;
+      $('offline-badge').classList.add('hidden');
+      $('status-indicator').className = 'w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_#34d399]';
+      if (state.user) syncOfflineData();
+    }
+
+    function handleOffline() {
+      state.isOnline = false;
+      $('offline-badge').classList.remove('hidden');
+      $('status-indicator').className = 'w-2.5 h-2.5 rounded-full bg-orange-500 shadow-[0_0_8px_#f97316]';
+    }
+
+    async function syncOfflineData() {
+      if (GAS_URL.includes('YOUR_GOOGLE')) return;
+      const queueKey = `syncQueue_${state.user}_${state.project}`;
+      const queue = JSON.parse(localStorage.getItem(queueKey) || '[]');
+      if (queue.length === 0) return;
+      
+      $('loading-text').textContent = i18n[state.lang].syncing;
+      $('loading-overlay').classList.remove('hidden');
+      
+      let remaining = [];
+      for (let payload of queue) {
+        try {
+          await fetch(GAS_URL, { method: 'POST', body: JSON.stringify(payload) });
+        } catch(e) {
+          remaining.push(payload);
+        }
+      }
+      localStorage.setItem(queueKey, JSON.stringify(remaining));
+      $('loading-overlay').classList.add('hidden');
+      
+      if (remaining.length === 0) {
+        showToast('success', 'SYNCED ✅', i18n[state.lang].syncSuccess);
+      } else {
+        showToast('error', 'SYNC ERROR ❌', `Failed to sync ${remaining.length} records.`);
+      }
+    }
 
     async function fetchGlobalData() {
       if (GAS_URL.includes('YOUR_GOOGLE')) return;
@@ -397,6 +515,7 @@
     }
 
     async function adminDelete() {
+      if (!state.isOnline) return alert("You must be online to use Admin Mode.");
       const type = $('admin-delete-type').value;
       const target = $('admin-target').value.trim();
 
@@ -425,13 +544,14 @@
       state.user = u; state.project = p;
       state.lang = localStorage.getItem(`lang_${u}`) || state.lang;
       state.counter = parseInt(localStorage.getItem(`counter_${u}_${p}`) || '0');
-      state.sessionHistory = []; // Reset undo history for new session
+      state.sessionHistory = []; 
       updateUndoButton();
       
       localStorage.setItem('last_user', u); localStorage.setItem(`project_${u}`, p); localStorage.setItem(`lang_${u}`, state.lang); 
       $('top-user-val').textContent = u; $('top-project-val').textContent = p; $('session-counter').textContent = state.counter;
       $('setup-overlay').classList.add('hidden');
       setLang(state.lang);
+      if (state.isOnline) syncOfflineData();
     }
 
     function openSetup() {
@@ -439,7 +559,7 @@
       toggleClearSetupBtns(); onUserSetupInput(); 
       $('btn-setup-cancel').classList.toggle('hidden', !state.user);
       $('setup-overlay').classList.remove('hidden');
-      fetchGlobalData();
+      if (state.isOnline) fetchGlobalData();
     }
     
     function closeSetup() { $('setup-overlay').classList.add('hidden'); }
@@ -453,11 +573,12 @@
       if (state.user) localStorage.setItem(`lang_${state.user}`, lang);
       else localStorage.setItem('global_lang', lang);
       
-      const setBtnState = (id1, id2) => {
-        $(id1).className = lang === 'ua' ? 'px-2.5 py-1 text-xs font-bold rounded-md bg-slate-700 text-white' : 'px-2.5 py-1 text-xs font-bold rounded-md text-slate-400';
-        $(id2).className = lang === 'en' ? 'px-2.5 py-1 text-xs font-bold rounded-md bg-slate-700 text-white' : 'px-2.5 py-1 text-xs font-bold rounded-md text-slate-400';
+      const setBtnState = (id1, id2, id3) => {
+        $(id1).className = lang === 'ua' ? 'px-2.5 py-1 text-xs font-bold rounded-md bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm dark:shadow-none transition-colors duration-300' : 'px-2.5 py-1 text-xs font-bold rounded-md text-slate-500 dark:text-slate-400';
+        $(id2).className = lang === 'en' ? 'px-2.5 py-1 text-xs font-bold rounded-md bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm dark:shadow-none transition-colors duration-300' : 'px-2.5 py-1 text-xs font-bold rounded-md text-slate-500 dark:text-slate-400';
+        $(id3).className = lang === 'de' ? 'px-2.5 py-1 text-xs font-bold rounded-md bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm dark:shadow-none transition-colors duration-300' : 'px-2.5 py-1 text-xs font-bold rounded-md text-slate-500 dark:text-slate-400';
       };
-      setBtnState('lang-ua', 'lang-en'); setBtnState('setup-lang-ua', 'setup-lang-en');
+      setBtnState('lang-ua', 'lang-en', 'lang-de'); setBtnState('setup-lang-ua', 'setup-lang-en', 'setup-lang-de');
       
       document.querySelectorAll('[data-i18n]').forEach(el => el.textContent = i18n[lang][el.getAttribute('data-i18n')]);
       document.querySelectorAll('[data-i18n-placeholder]').forEach(el => el.placeholder = i18n[lang][el.getAttribute('data-i18n-placeholder')]);
@@ -479,7 +600,7 @@
     function changePixels(d) {
       state.px = Math.max(0, state.px + d);
       $('px-count').textContent = state.px;
-      $('px-count').className = state.px > 0 ? 'text-5xl font-black text-red-400 tabular-nums' : 'text-5xl font-black text-white tabular-nums';
+      $('px-count').className = state.px > 0 ? 'text-5xl font-black text-red-600 dark:text-red-400 tabular-nums transition-colors duration-300' : 'text-5xl font-black text-slate-900 dark:text-white tabular-nums transition-colors duration-300';
     }
 
     function toggleShader() {
@@ -498,7 +619,6 @@
       clearTimeout(serialCheckTimer);
       let serial = $('serial-input').value.trim();
       
-      // Auto-expand 5 digit manual entry
       if (/^\d{5}$/.test(serial)) {
         serial = 'BP39S00' + serial;
         $('serial-input').value = serial;
@@ -517,8 +637,23 @@
     }
 
     async function checkSerial(serial) {
-      if (!state.project || GAS_URL.includes('YOUR_GOOGLE')) return;
+      if (!state.project) return;
       
+      if (!state.isOnline) {
+        const queueKey = `syncQueue_${state.user}_${state.project}`;
+        const queue = JSON.parse(localStorage.getItem(queueKey) || '[]');
+        const existsInQueue = queue.find(q => q.serial === serial && q.action !== 'delete_serial');
+        
+        if (existsInQueue) {
+          state.duplicateData = { user: state.user, item: existsInQueue.item, offline: true };
+          showDuplicateWarning(state.duplicateData);
+        } else {
+          resetDuplicateState();
+        }
+        return;
+      }
+
+      if (GAS_URL.includes('YOUR_GOOGLE')) return;
       const payload = { action: 'check_serial', project: state.project, serial: serial };
       try {
         const response = await fetch(GAS_URL, { method: 'POST', body: JSON.stringify(payload) });
@@ -535,15 +670,15 @@
 
     function showDuplicateWarning(data) {
       $('duplicate-warning').classList.remove('hidden');
-      $('dup-info').textContent = `${i18n[state.lang].dupAddedBy} ${data.user} | ${i18n[state.lang].dupPos} ${data.item}`;
-      $('serial-input').classList.add('border-orange-500', 'text-orange-400');
+      $('dup-info').textContent = `${i18n[state.lang].dupAddedBy} ${data.user} ${data.offline ? '(Offline)' : ''} | ${i18n[state.lang].dupPos} ${data.item}`;
+      $('serial-input').classList.add('border-orange-500', 'text-orange-600', 'dark:text-orange-400');
       updateSubmitState();
     }
 
     function resetDuplicateState() {
       state.duplicateData = null;
       $('duplicate-warning').classList.add('hidden');
-      $('serial-input').classList.remove('border-orange-500', 'text-orange-400');
+      $('serial-input').classList.remove('border-orange-500', 'text-orange-600', 'dark:text-orange-400');
       updateSubmitState();
     }
 
@@ -552,9 +687,19 @@
       if (!serial || !state.duplicateData) return;
       if (!confirm(`${i18n[state.lang].undoConfirm} ${serial}?`)) return;
       
-      $('loading-text').textContent = i18n[state.lang].loading;
       const payload = { action: 'delete_serial', project: state.project, serial: serial };
       
+      if (!state.isOnline) {
+         let queueKey = `syncQueue_${state.user}_${state.project}`;
+         let queue = JSON.parse(localStorage.getItem(queueKey) || '[]');
+         queue = queue.filter(q => q.serial !== serial);
+         localStorage.setItem(queueKey, JSON.stringify(queue));
+         showToast('success', 'DELETED OFFLINE ✅', `Serial ${serial} removed.`);
+         clearSerial();
+         return;
+      }
+
+      $('loading-text').textContent = i18n[state.lang].loading;
       await sendRequest(payload, (resp) => {
         showToast('success', 'DELETED ✅', `Serial ${serial} removed.`);
         clearSerial();
@@ -577,9 +722,24 @@
       const lastSerial = state.sessionHistory[state.sessionHistory.length - 1];
       if (!confirm(`${i18n[state.lang].undoConfirm} ${lastSerial}?`)) return;
       
-      $('loading-text').textContent = i18n[state.lang].loading;
       const payload = { action: 'delete_serial', project: state.project, serial: lastSerial };
       
+      if (!state.isOnline) {
+         let queueKey = `syncQueue_${state.user}_${state.project}`;
+         let queue = JSON.parse(localStorage.getItem(queueKey) || '[]');
+         queue = queue.filter(q => q.serial !== lastSerial);
+         localStorage.setItem(queueKey, JSON.stringify(queue));
+         
+         showToast('success', i18n[state.lang].undoSuccess, `Serial ${lastSerial} removed.`);
+         state.sessionHistory.pop();
+         updateUndoButton();
+         state.counter = Math.max(0, state.counter - 1);
+         localStorage.setItem(`counter_${state.user}_${state.project}`, state.counter);
+         $('session-counter').textContent = state.counter;
+         return;
+      }
+
+      $('loading-text').textContent = i18n[state.lang].loading;
       await sendRequest(payload, (resp) => {
         showToast('success', i18n[state.lang].undoSuccess, `Serial ${lastSerial} removed.`);
         state.sessionHistory.pop();
@@ -606,14 +766,14 @@
           btn.className = "w-full py-6 rounded-3xl font-black text-xl tracking-wide transition-all bg-brand-600 text-white cursor-pointer submit-ready shadow-xl active:scale-95 flex items-center justify-center gap-3";
           $('submit-text').textContent = i18n[state.lang].submitBtn;
           $('submit-hint').textContent = i18n[state.lang].submitReady;
-          $('submit-hint').className = "text-center text-emerald-400 font-bold text-sm py-1";
+          $('submit-hint').className = "text-center text-emerald-600 dark:text-emerald-400 font-bold text-sm py-1";
         }
       } else {
         btn.disabled = true;
-        btn.className = "w-full py-6 rounded-3xl font-black text-xl tracking-wide transition-all bg-slate-700 text-slate-500 cursor-not-allowed flex items-center justify-center gap-3";
+        btn.className = "w-full py-6 rounded-3xl font-black text-xl tracking-wide transition-all bg-slate-200 dark:bg-slate-700 text-slate-400 dark:text-slate-500 cursor-not-allowed flex items-center justify-center gap-3";
         $('submit-text').textContent = i18n[state.lang].submitBtn;
         $('submit-hint').textContent = i18n[state.lang].submitFill;
-        $('submit-hint').className = "text-center text-slate-500 text-sm py-1";
+        $('submit-hint').className = "text-center text-slate-500 dark:text-slate-500 text-sm py-1";
       }
     }
 
@@ -637,7 +797,7 @@
             $('serial-input').value = decodedText.trim();
             stopCamera();
             if (navigator.vibrate) navigator.vibrate([80, 40, 80]);
-            onSerialInput(); // triggers debounce check
+            onSerialInput(); 
             setTimeout(() => $('item-LT').scrollIntoView({ behavior: 'smooth', block: 'center' }), 300);
           },
           () => {}
@@ -671,31 +831,52 @@
       const action = state.duplicateData ? 'overwrite_serial' : 'save';
       const payload = { action, user: state.user, project: state.project, serial: serial, item: state.item, problem: problem };
 
+      if (!state.isOnline) {
+         let queueKey = `syncQueue_${state.user}_${state.project}`;
+         let queue = JSON.parse(localStorage.getItem(queueKey) || '[]');
+         if (action === 'overwrite_serial') {
+            queue = queue.filter(q => q.serial !== serial);
+         }
+         queue.push(payload);
+         localStorage.setItem(queueKey, JSON.stringify(queue));
+         onSuccessSubmit(true, serial);
+         return;
+      }
+
       await sendRequest(payload, () => {
-        if (!state.duplicateData) {
-          state.counter++;
-          localStorage.setItem(`counter_${state.user}_${state.project}`, state.counter);
-          $('session-counter').textContent = state.counter;
-        }
-        showToast('success', 'SUCCESS ✅', `${serial} | ${state.item}`);
-        
-        state.sessionHistory.push(serial);
-        updateUndoButton();
-        
-        clearSerial();
-        if (state.item) selectItem(state.item);
-        if (state.px > 0) { state.px = 0; changePixels(0); }
-        if (state.shader) toggleShader();
-        $('notes-input').value = '';
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        setTimeout(() => startCamera(), 1200);
+        onSuccessSubmit(false, serial);
       });
+    }
+
+    function onSuccessSubmit(isOffline, serial) {
+      if (!state.duplicateData) {
+        state.counter++;
+        localStorage.setItem(`counter_${state.user}_${state.project}`, state.counter);
+        $('session-counter').textContent = state.counter;
+      }
+      if (isOffline) {
+        showToast('success', 'OFFLINE SAVED 📦', `${serial} | ${state.item}`);
+      } else {
+        showToast('success', 'SUCCESS ✅', `${serial} | ${state.item}`);
+      }
+      
+      state.sessionHistory.push(serial);
+      updateUndoButton();
+      
+      clearSerial();
+      if (state.item) selectItem(state.item);
+      if (state.px > 0) { state.px = 0; changePixels(0); }
+      if (state.shader) toggleShader();
+      $('notes-input').value = '';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      setTimeout(() => startCamera(), 1200);
     }
 
     function openExportModal() { $('export-modal').classList.remove('hidden'); }
     function closeExportModal() { $('export-modal').classList.add('hidden'); }
 
     async function doExport(type) {
+      if (!state.isOnline) return alert("You must be online to export.");
       closeExportModal();
       $('loading-text').textContent = i18n[state.lang].exporting;
       
@@ -720,14 +901,7 @@
         else { onSuccess(result); }
       } catch (err) {
         $('loading-overlay').classList.add('hidden');
-        showToast('error', 'NETWORK ERROR ❌', "Using 'no-cors' mode might be required, or the script failed.");
-        if ((payload.action === 'save' || payload.action === 'overwrite_serial') && err.message.includes('Failed to fetch')) {
-            try {
-               await fetch(GAS_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
-               onSuccess({});
-               return;
-            } catch(e) {}
-        }
+        showToast('error', 'NETWORK ERROR ❌', "Could not reach server.");
       }
     }
 
@@ -739,13 +913,13 @@
       toast.className = toast.className.replace(/toast-in|toast-out/, '').trim();
       const icon = $('toast-icon');
       if (type === 'success') {
-        toast.className = 'rounded-3xl px-6 py-5 shadow-2xl border pointer-events-auto bg-emerald-950 border-emerald-700 text-emerald-100 toast-in';
-        icon.className = 'w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0 mt-0.5 bg-emerald-800';
-        icon.innerHTML = '<svg class="w-6 h-6 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>';
+        toast.className = 'rounded-3xl px-6 py-5 shadow-2xl border pointer-events-auto bg-emerald-100 dark:bg-emerald-950 border-emerald-300 dark:border-emerald-700 text-emerald-900 dark:text-emerald-100 toast-in transition-colors duration-300';
+        icon.className = 'w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0 mt-0.5 bg-emerald-200 dark:bg-emerald-800 transition-colors duration-300';
+        icon.innerHTML = '<svg class="w-6 h-6 text-emerald-600 dark:text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>';
       } else {
-        toast.className = 'rounded-3xl px-6 py-5 shadow-2xl border pointer-events-auto bg-red-950 border-red-700 text-red-100 toast-in';
-        icon.className = 'w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0 mt-0.5 bg-red-800';
-        icon.innerHTML = '<svg class="w-6 h-6 text-red-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>';
+        toast.className = 'rounded-3xl px-6 py-5 shadow-2xl border pointer-events-auto bg-red-100 dark:bg-red-950 border-red-300 dark:border-red-700 text-red-900 dark:text-red-100 toast-in transition-colors duration-300';
+        icon.className = 'w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0 mt-0.5 bg-red-200 dark:bg-red-800 transition-colors duration-300';
+        icon.innerHTML = '<svg class="w-6 h-6 text-red-600 dark:text-red-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>';
       }
       toast.classList.remove('hidden');
       toastTimer = setTimeout(() => {
