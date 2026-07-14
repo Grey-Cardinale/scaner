@@ -83,6 +83,22 @@
           </div>
         </div>
       </div>
+
+      <!-- Admin Panel (Hidden by default) -->
+      <div id="admin-panel" class="hidden border-t border-red-500/30 pt-5 mt-2 space-y-4">
+        <p class="text-red-400 font-bold text-center text-sm tracking-widest" data-i18n="adminMode">ADMIN MODE</p>
+        <select id="admin-delete-type" onchange="onAdminTypeChange()" class="w-full bg-red-950/40 border border-red-900/50 rounded-xl px-4 py-3 text-red-200 font-semibold focus:outline-none focus:border-red-500">
+          <option value="project" data-i18n="adminDelProject">Delete specific Project</option>
+          <option value="user" data-i18n="adminDelUser">Delete specific User</option>
+          <option value="all" data-i18n="adminDelAll">WIPE ENTIRE DATABASE</option>
+        </select>
+        <div class="relative">
+          <input id="admin-target" type="text" list="projects-list" class="w-full bg-red-950/40 border border-red-900/50 rounded-xl px-4 py-3 text-red-100 placeholder-red-900/50" data-i18n-placeholder="adminTargetProject" placeholder="Type project name here...">
+        </div>
+        <button onclick="adminDelete()" class="w-full py-4 rounded-xl font-bold text-lg bg-red-600 hover:bg-red-500 text-white shadow-[0_0_15px_rgba(220,38,38,0.5)] active:scale-95 transition-transform" data-i18n="adminDelBtn">
+          DELETE DATA
+        </button>
+      </div>
       
       <!-- Loading indicator for global list fetch -->
       <div id="setup-loading" class="hidden text-center text-brand-400 text-xs font-semibold animate-pulse" data-i18n="fetchingData">Fetching global users...</div>
@@ -96,7 +112,7 @@
 
       <!-- Reset Cache Button -->
       <button onclick="clearAllData()" class="text-xs font-semibold text-slate-500 hover:text-red-400 mt-6 pt-4 border-t border-slate-700/50 block w-full text-center transition-colors" data-i18n="clearDataBtn">
-        Reset all local data (Clear Cache)
+        Clear browser cache
       </button>
 
     </div>
@@ -258,6 +274,9 @@
         setupUser: "Full first name & last name initial", setupProject: "Project Name", setupBtn: "START WORKING",
         setupListHint: "Start typing or click arrow to see saved options", clearDataBtn: "Clear browser cache",
         confirmClear: "Are you sure you want to clear the browser cache?",
+        adminMode: "ADMIN MODE", adminDelProject: "Delete specific Project", adminDelUser: "Delete specific User", adminDelAll: "WIPE ENTIRE DATABASE",
+        adminTargetProject: "Type project name here...", adminTargetUser: "Type username here...", adminTargetAll: "Type 'all' to confirm", adminDelBtn: "DELETE DATA",
+        adminConfirmAll: "CRITICAL WARNING: This will delete the ENTIRE database. Are you absolutely sure?", adminConfirmItem: "Are you sure you want to delete", adminAllError: "Type 'all' in the target field to confirm wipe.", adminTargetError: "Please enter the name to delete.", adminDeleting: "Deleting data...",
         topUser: "User:", topProject: "Project:", changeSession: "Change",
         serialLabel: "Serial number", cameraOn: "TURN ON CAMERA", cameraOff: "TURN OFF CAMERA", serialPlaceholder: "Scan or type manually...",
         itemLabel: "Panel Position (Item)", itemLT: "Left · Top", itemRT: "Right · Top", itemLB: "Left · Bottom", itemRB: "Right · Bottom",
@@ -274,6 +293,9 @@
         setupUser: "Повне ім'я та перша літера прізвища", setupProject: "Назва Проекту", setupBtn: "ПОЧАТИ РОБОТУ",
         setupListHint: "Почніть вводити або натисніть стрілку для вибору", clearDataBtn: "Очистити кеш браузера",
         confirmClear: "Ви впевнені, що хочете очистити кеш браузера?",
+        adminMode: "РЕЖИМ АДМІНІСТРАТОРА", adminDelProject: "Видалити певний Проект", adminDelUser: "Видалити певного Юзера", adminDelAll: "ОЧИСТИТИ ВСЮ БАЗУ ДАНИХ",
+        adminTargetProject: "Введіть назву проекту...", adminTargetUser: "Введіть ім'я юзера...", adminTargetAll: "Введіть 'all' для підтвердження", adminDelBtn: "ВИДАЛИТИ ДАНІ",
+        adminConfirmAll: "КРИТИЧНЕ ПОПЕРЕДЖЕННЯ: Це видалить УСЮ базу даних. Ви абсолютно впевнені?", adminConfirmItem: "Ви впевнені, що хочете видалити", adminAllError: "Введіть слово 'all' у поле для підтвердження.", adminTargetError: "Будь ласка, введіть назву для видалення.", adminDeleting: "Видалення даних...",
         topUser: "Юзер:", topProject: "Проект:", changeSession: "Змінити",
         serialLabel: "Серійний номер", cameraOn: "УВІМКНУТИ КАМЕРУ", cameraOff: "ВИМКНУТИ КАМЕРУ", serialPlaceholder: "Відскануйте або введіть вручну…",
         itemLabel: "Позиція панелі (Item)", itemLT: "Ліво · Верх", itemRT: "Право · Верх", itemLB: "Ліво · Низ", itemRB: "Право · Низ",
@@ -313,7 +335,7 @@
       const globalLang = localStorage.getItem('global_lang') || 'en';
       const savedUser = localStorage.getItem('last_user');
       
-      if (savedUser) {
+      if (savedUser && savedUser.toLowerCase() !== 'admin') {
         state.user = savedUser;
         state.project = localStorage.getItem(`project_${savedUser}`) || '';
         state.lang = localStorage.getItem(`lang_${savedUser}`) || globalLang;
@@ -378,7 +400,7 @@
       $('clear-project-btn').classList.toggle('hidden', !$('setup-project').value);
     }
     
-    function clearSetupUser() { $('setup-user').value = ''; toggleClearSetupBtns(); $('setup-user').focus(); }
+    function clearSetupUser() { $('setup-user').value = ''; toggleClearSetupBtns(); onUserSetupInput(); $('setup-user').focus(); }
     function clearSetupProject() { $('setup-project').value = ''; toggleClearSetupBtns(); $('setup-project').focus(); }
 
     function onUserSetupInput() {
@@ -387,10 +409,59 @@
         $('setup-project').value = globalUserProjects[u];
       }
       toggleClearSetupBtns();
+
+      // Admin check
+      if (u.toLowerCase() === 'admin') {
+        $('admin-panel').classList.remove('hidden');
+        $('btn-setup-start').classList.add('hidden');
+      } else {
+        $('admin-panel').classList.add('hidden');
+        $('btn-setup-start').classList.remove('hidden');
+      }
     }
     
     function onProjectSetupInput() {
       toggleClearSetupBtns();
+    }
+
+    function onAdminTypeChange() {
+      const type = $('admin-delete-type').value;
+      const targetInput = $('admin-target');
+      if (type === 'project') {
+        targetInput.placeholder = i18n[state.lang].adminTargetProject;
+        targetInput.setAttribute('list', 'projects-list');
+      } else if (type === 'user') {
+        targetInput.placeholder = i18n[state.lang].adminTargetUser;
+        targetInput.setAttribute('list', 'users-list');
+      } else if (type === 'all') {
+        targetInput.placeholder = i18n[state.lang].adminTargetAll;
+        targetInput.removeAttribute('list');
+      }
+      targetInput.value = '';
+    }
+
+    async function adminDelete() {
+      const type = $('admin-delete-type').value;
+      const target = $('admin-target').value.trim();
+
+      if (type === 'all') {
+        if (target.toLowerCase() !== 'all') {
+          return alert(i18n[state.lang].adminAllError);
+        }
+        if (!confirm(i18n[state.lang].adminConfirmAll)) return;
+      } else {
+        if (!target) return alert(i18n[state.lang].adminTargetError);
+        if (!confirm(`${i18n[state.lang].adminConfirmItem} "${target}"?`)) return;
+      }
+
+      $('loading-text').textContent = i18n[state.lang].adminDeleting;
+      const payload = { action: 'delete', deleteType: type, targetName: target };
+      
+      await sendRequest(payload, (resp) => {
+        showToast('success', 'DELETED ✅', `Removed ${resp.count} rows.`);
+        $('admin-target').value = '';
+        fetchGlobalData(); // refresh lists
+      });
     }
 
     function saveSetup() {
@@ -420,6 +491,7 @@
       $('setup-user').value = '';
       $('setup-project').value = '';
       toggleClearSetupBtns();
+      onUserSetupInput(); // to hide admin panel just in case
       
       if (state.user) {
         $('btn-setup-cancel').classList.remove('hidden');
@@ -460,6 +532,11 @@
       });
       
       if (state.cameraRunning) $('btn-camera-text').textContent = i18n[lang].cameraOff;
+      
+      // Update admin placeholders dynamically based on current selection
+      if($('admin-panel') && !$('admin-panel').classList.contains('hidden')) {
+          onAdminTypeChange();
+      }
       
       updateSubmitState();
     }
